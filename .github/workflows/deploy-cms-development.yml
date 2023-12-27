@@ -1,0 +1,108 @@
+name: "Deploy CMS development"
+
+on:
+  push:
+    branches:
+      - development
+  workflow_dispatch:
+  # pull_request:
+  #   branches:
+  #       - stable
+  #   types: [closed]
+
+# permissions:
+#   contents: read
+#   # Needed for the 'trilom/file-changes-action' action
+#   pull-requests: read
+permissions: write-all
+
+# This allows a subsequently queued workflow run to interrupt previous runs
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  deploy-cms:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - run: |
+          git pull
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - uses: culshaw/read-package-node-version-actions@v1
+        id: package-json
+
+      - name: Show version number
+        run: echo "${{ steps.package-json.outputs.version }}"
+
+      - name: "cat package.json"
+        run: cat ./package.json
+
+      - name: Use .npmrc
+        uses: bduff9/use-npmrc@v1.2
+        with:
+          dot-npmrc: ${{ secrets.DOT_NPMRC }}
+
+      - name: yarn install
+        run: yarn install
+
+      - name: "Create env.development file"
+        run: |
+          touch .env.development
+          echo REACT_APP_ID=sample >> .env.development
+          echo REACT_APP_VERSION_NAME=${{ steps.package-json.outputs.version }} >> .env.development
+          echo REACT_APP_STAGE=development >> .env.development
+          echo REACT_APP_WEBSITE_NAME="CMS System" >> .env.development
+          echo REACT_APP_WEBSITE_SUBTITLE="Manage your data here" >> .env.development
+          echo REACT_APP_BASE_URL=https://base-api-development.qbit.co.id >> .env.development
+          echo REACT_APP_CHECK_HEALTH_URL=https://base-api-development.qbit.co.id >> .env.development
+          echo REACT_APP_CMS_BASE_URL=https://base-cms-development.qbit.co.id >> .env.development
+          echo REACT_APP_AZURE_ENTRA_APP_ID=${{ secrets.AZURE_ENTRA_APP_ID }} >> .env.development
+          cat .env.development
+
+      - name: Build development
+        env:
+          CI: false
+        run: yarn build:development
+
+      - name: Upload to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_DEVELOPMENT }}
+          username: ${{ secrets.SSH_USER_DEVELOPMENT }}
+          port: ${{ secrets.SSH_PORT_DEVELOPMENT }}
+          key: ${{ secrets.SSH_KEY_DEVELOPMENT }}
+          # Selecting all folders except "node_modules"
+          # source: ".,!node_modules"
+          source: "./build"
+          # The path is based on the directory where the user logged into the server starts
+          target: "/var/www/html/apps/base-cms-development"
+          rm: true
+
+      - name: Restart nginx
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_DEVELOPMENT }}
+          username: ${{ secrets.SSH_USER_DEVELOPMENT }}
+          port: ${{ secrets.SSH_PORT_DEVELOPMENT }}
+          key: ${{ secrets.SSH_KEY_DEVELOPMENT }}
+          script: sudo systemctl restart nginx
+
+      - name: send telegram message on push
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🏡 BASE (SAMPLE) CMS development v${{ steps.package-json.outputs.version }} 🏡
+            Has been deployed by ${{ github.actor }}
+
+            https://base-cms-development.qbit.co.id/
+            Ready for test. Thanks
