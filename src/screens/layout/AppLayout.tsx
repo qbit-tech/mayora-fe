@@ -3,6 +3,7 @@ import { Button, Layout, Space, Spin, Tooltip, Typography } from 'antd';
 import {
   BellOutlined,
   CalendarOutlined,
+  ClockCircleOutlined,
   EnvironmentOutlined,
   FileTextOutlined,
   HomeOutlined,
@@ -19,8 +20,6 @@ import styled from 'styled-components';
 import UserAvatar from '../../components/UserAvatar';
 import { appVersion, now, thisYear } from '../../helpers/constant';
 import useConfigApp from '../../hooks/useConfigApp';
-import AppLogo from '../../components/AppLogo';
-import Breadcrumbs from '../../components/Breadcrumbs';
 import Sidebar from '../../components/Sidebar';
 import { Outlet, useLocation } from 'react-router-dom';
 import { theme } from '../../assets/theme';
@@ -163,111 +162,93 @@ const AppLayout: React.FC<Props> = () => {
   const { sidebarCollapsed, toggleSidebar } = useConfigApp();
   const location = useLocation();
   const auth = useAuthUser();
+  const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+const d = new Date();
+let day = weekday[d.getDay()];
 
   return (
-    <Layout style={{ height: '100vh', flexDirection: 'row' }}>
-      <AppSider
-        onCollapse={toggleSidebar}
-        trigger={null}
-        collapsible
-        collapsed={sidebarCollapsed}
-        collapsedWidth={70}
-        width={250}
-        style={{ paddingLeft: sidebarCollapsed ? 0 : '5px', height: '100vh' }}
-      >
-        <AppLogo collapsed={sidebarCollapsed} />
-        <Sidebar />
-      </AppSider>
-      {sidebarCollapsed ? (
-        <Tooltip placement="right" title={'Expand Sidebar'}>
-          <Button
+    <div style={{height: '100vh', }}>
+      <Layout>
+      <AppHeader>
+            <img src="/mayora.svg" alt="mayora" height="20"/>
+            <AppHeaderAccount>
+              <DateNow>
+                <CalendarOutlined style={{marginRight: '7px'}}/>
+                {weekday[new Date().getDay()]+ ", " + new Date().getDate() + "/" + (new Date().getMonth() + 1) + "/" + new Date().getFullYear()}
+                <ClockCircleOutlined style={{marginRight: '7px', marginLeft: '12px'}}/>
+                {new Date().getHours() + ":" + (new Date().getMinutes() + 1) + ":" + new Date().getSeconds()}
+              </DateNow>
+              <DividerTitle />
+              <UserAvatar />
+            </AppHeaderAccount>
+      </AppHeader>
+      </Layout>
+      <Layout style={{ flexDirection: 'row'}}>
+        <AppSider
+          onCollapse={toggleSidebar}
+          trigger={null}
+          collapsible
+          collapsed={sidebarCollapsed}
+          collapsedWidth={70}
+          width={250}
+          style={{ paddingLeft: sidebarCollapsed ? 0 : '0', height: '100vh' }}
+        >
+          {/* <AppLogo collapsed={sidebarCollapsed} /> */}
+          <Sidebar />
+        {sidebarCollapsed ? (
+          <Tooltip placement="right" title={'Expand Sidebar'}>
+            <Button
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                height: 40,
+                width: 66,
+                backgroundColor: theme.colors.background,
+              }}
+              onClick={toggleSidebar}
+              type="text"
+              icon={
+                <RightCircleOutlined
+                  style={{ color: theme.colors.white }}
+                  className="icon-collapsed"
+                />
+              }
+            />
+          </Tooltip>
+        ) : (
+          <MinimizeButton
+            onClick={toggleSidebar}
             style={{
               position: 'absolute',
               bottom: 0,
               height: 40,
-              width: 66,
-              backgroundColor: theme.colors.primary,
+              width: "100%",
             }}
-            onClick={toggleSidebar}
-            type="text"
-            icon={
-              <RightCircleOutlined
-                style={{ color: theme.colors.white }}
-                className="icon-collapsed"
-              />
-            }
-          />
-        </Tooltip>
-      ) : (
-        <MinimizeButton
-          onClick={toggleSidebar}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            height: 40,
-            width: 240,
-          }}
+          >
+            <div>
+              v{appVersion} · ©{thisYear}
+            </div>
+            <LeftCircleOutlined color={theme.colors.white} />
+          </MinimizeButton>
+        )}
+        </AppSider>
+
+        <Layout
+          id="scroll-content"
+          className="site-layout"
+          style={{ minHeight: '100vh', overflowY: 'scroll', backgroundColor: "#EEEFEF", paddingTop: '5px'}}
         >
-          <div>
-            v{appVersion} · ©{thisYear}
-          </div>
-          <LeftCircleOutlined color={theme.colors.white} />
-        </MinimizeButton>
-      )}
-
-      <Layout
-        id="scroll-content"
-        className="site-layout"
-        style={{ minHeight: '100vh', overflowY: 'scroll' }}
-      >
-        <AppHeader>
-          {location.pathname === '/dashboard' ? (
-            <Typography.Title level={3} style={{ marginBottom: 0 }}>
-              {process.env.REACT_APP_WEBSITE_NAME}
-            </Typography.Title>
-          ) : (
-            // <Breadcrumbs />
-
-            APP_LABEL.map((item) => {
-              if (item.key === location.pathname) {
-                return (
-                  <AppHeaderLabel>
-                    {item.icon}
-                    <Typography.Title
-                      level={3}
-                      style={{ marginBottom: 0, fontSize: 18 }}
-                    >
-                      {item.label}
-                    </Typography.Title>
-                  </AppHeaderLabel>
-                );
-              }
-            })
-          )}
-
-          <AppHeaderAccount>
-            {/* <DateNow>
-              Welcome, <b>{auth()?.firstName || auth()?.name}</b>{' '}
-              <small>
-                (<i>{auth()?.role.roleName}</i>)
-              </small>
-            </DateNow> */}
-            {/* <DateNow>{new Date().toISOString()}</DateNow> */}
-            <DividerTitle />
-            <UserAvatar />
-          </AppHeaderAccount>
-        </AppHeader>
-        <AppContent>
-          <Space size="middle" direction="vertical">
-            <Breadcrumbs marginTop={10} />
-
-            <Suspense fallback={<Spin spinning={true} />}>
-              <Outlet />
-            </Suspense>
-          </Space>
-        </AppContent>
+          <AppContent>
+            <Space size="middle" direction="vertical">
+              <Suspense fallback={<Spin spinning={true} />}>
+                <Outlet />
+              </Suspense>
+            </Space>
+          </AppContent>
+        </Layout>
       </Layout>
-    </Layout>
+    </div>
   );
 };
 
@@ -324,7 +305,7 @@ const DividerTitle = styled.div`
 `;
 
 const MinimizeButton = styled.div`
-  background-color: ${({ theme }) => theme.colors.primary};
+  background-color: ${({ theme }) => theme.colors.background};
   width: 100%;
   display: flex;
   height: 60px;

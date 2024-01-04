@@ -1,11 +1,11 @@
 :root {
   /* colors */
-  --primary: #9e2a2a;
-  --secondary: #0b988e;
+  --primary: #101633;
+  --secondary: hsl(106, 58%, 39%);
   --bg-gray: #f4f6f9;
 
   /* Color Setting */
-  --button-primary-color: var(--secondary);
+  --button-primary-color: hsl(0, 58%, 39%);
   --sidebar-primary-color: var(--primary);
   --breadcrumbs-primary-color: var(--primary);
   --breadcrumbs-primary-bg-color: var(--bg-gray);
@@ -59,8 +59,15 @@ a {
 
 .ant-menu-item-selected,
 .ant-menu-item-selected:hover {
-  color: var(--button-primary-color) !important;
-  background-color: white !important;
+  /* color: var(--button-primary-color) !important; */
+  background-color: #242845 !important;
+  color: white !important;
+  border-style: solid;
+  box-sizing: border-box !important;
+  -moz-box-sizing: border-box !important;
+  -webkit-box-sizing: border-box !important;
+  border-left-color: red;
+  border-width: 0px 0px 0px 5px;
 }
 
 #menu-sidebar {
@@ -131,6 +138,11 @@ a {
 
 .ant-badge-multiple-words {
   padding: 0 5px !important;
+}
+
+.ant-menu-item-divider {
+  height: 5px;
+  background-color: #5E627A;
 }
 
 .ant-menu .ant-menu-sub .ant-menu-vertical {
@@ -464,10 +476,49 @@ h4.ant-typography {
 .ant-tabs > .ant-tabs-nav,
 .ant-tabs > div > .ant-tabs-nav {
   margin-bottom: 0;
+
 }
 
-.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+.ant-tabs-card.ant-tabs-top >.ant-tabs-nav .ant-tabs-tab{
+  border-radius: 0;
+}
+
+.ant-tabs-tab:hover{
+  color: var(--button-primary-color) !important;
+}
+
+.ant-tabs-card >.ant-tabs-nav .ant-tabs-tab{
+  background-color: #e1e0e1;
+}
+
+.ant-tabs-card >.ant-tabs-nav .ant-tabs-tab-active{
+  background-color: white;
+}
+
+
+
+.ant-tabs-card.ant-tabs-top >.ant-tabs-nav .ant-tabs-tab-active{
+  border-bottom-color: var(--button-primary-color);
+  border-bottom-width: 3px;
+  border-radius: none !important;
+}
+
+/* .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
   color: #1e1e1e;
+  
+} */
+
+.ant-tabs-tab-btn:hover {
+  color: var(--button-primary-color) !important;
+}
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--button-primary-color) !important; 
+  font-weight: 500;
+}
+
+.ant-tabs-ink-bar {
+  position: absolute;
+  pointer-events: none;
 }
 
 .avatar-remax {

@@ -31,11 +31,11 @@ const AuthHeaderCard: React.FC<Props> = ({ title, subtitle, status, showBackButo
             <ArrowLeftOutlined/>
           </Button>
           <Center>
-            <img height="40" src="/logo.png" alt="Logo" />
+            <img height="50" src="/mayora.svg" alt="Logo" />
           </Center>
         </HeaderContainer>
       ):(
-        <img height="40" src="/logo.png" alt="Logo" />
+        <img height="50" src="/mayora.svg" alt="Logo" />
       )}
       {
         status === 'email' ? (
@@ -44,8 +44,12 @@ const AuthHeaderCard: React.FC<Props> = ({ title, subtitle, status, showBackButo
           <IconStatus src="/images/reset-password-success.svg" alt="icon-reset-password-success" />
         ) : <></>
       }
-      {title && <AuthTitleCard>{title}</AuthTitleCard>}
-      <AuthSubTitleCard>{subtitle}</AuthSubTitleCard>
+      <h1 style={{fontWeight: '600'}}>
+        {title && <AuthTitleCard>{title}</AuthTitleCard>}
+      </h1>
+      <AuthSubTitleCard>
+        {subtitle}
+      </AuthSubTitleCard>
     </AuthWrapperHeader>
   )
 }
@@ -73,18 +77,19 @@ export const IconStatus = styled.img`
 
 export const AuthTitleCard = styled.div`
   width: 100%;
-  font-size: ${({ theme }) => theme.fontSize.title};
-  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  font-size: ${({ theme }) => theme.fontSize.body};
   color: ${({ theme }) => theme.colors.black};
   margin-top: 20px;
+  text-align: center;
 `
 
 export const AuthSubTitleCard = styled.div`
-  font-size: ${({ theme }) => theme.fontSize.body};
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-size: ${({ theme }) => theme.fontSize.body1};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ theme }) => theme.colors.charcoal400};
   margin-top: 10px;
   width: 100%;
+  text-align: center;
 `
 
 export default AuthHeaderCard

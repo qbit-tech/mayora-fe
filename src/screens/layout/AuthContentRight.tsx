@@ -33,8 +33,7 @@ const Box1 = styled.div`
   top: -200px;
   transform: rotate(-17.13deg);
   width: 667px;
-  z-index: 50;
-}`;
+  z-index: 50;`
 
 const Box2 = styled.div`
   background-color: #FFFFFF1A;
@@ -45,8 +44,7 @@ const Box2 = styled.div`
   top: -190px;
   transform: rotate(15deg);
   width: 767px;
-  z-index: 40;
-}`;
+  z-index: 40;`;
 
 const Box3 = styled.div`
   background-color: #045AFF;
@@ -57,8 +55,7 @@ const Box3 = styled.div`
   bottom: 0;
   transform: rotate(6.51deg);
   width: 550px;
-  z-index: 10;
-}`;
+  z-index: 10;`;
 
 const Box4 = styled.div`
   background-color: #003DB1;
@@ -69,8 +66,7 @@ const Box4 = styled.div`
   bottom: -200px;
   transform: rotate(-42.02deg);
   width: 550px;
-  z-index: 40;
-}`;
+  z-index: 40;`;
 
 const Box4Child = styled.div`
   background-color: #FFFFFF1A;
@@ -80,7 +76,6 @@ const Box4Child = styled.div`
   position: absolute;
   bottom: -40px;
   transform: rotate(-190deg);
-  width: 500px;
-}`;
+  width: 500px;`;
 
 export default AuthContentRight;

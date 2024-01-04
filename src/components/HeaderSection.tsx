@@ -22,7 +22,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   return (
     <Container
       style={{
-        background: '#F4F6F9',
         marginLeft: '-20px',
         marginRight: '-20px',
         padding: '10px 24px',

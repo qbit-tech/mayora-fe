@@ -16,8 +16,11 @@ declare module 'styled-components' {
       regular: string;
       bold: string;
     };
+    components: any;
 
     colors: {
+      background: string;
+      blue: string;
       primary: string;
       secondary: string;
       black: string;

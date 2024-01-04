@@ -24,17 +24,16 @@ const AuthLayout: React.FC<Props> = ({
       <Container>
         {formPosition === 'right' ? (
           <>
-            {variant === 'primary' ? (
+            {/* {variant === 'primary' ? (
               <AuthContentLeft />
             ) : (
               <AuthContentLeftSecondary />
-            )}
+            )} */}
             <ContentRight>{children}</ContentRight>
           </>
         ) : (
           <>
             <ContentRight>{children}</ContentRight>
-            <AuthContentRight />
           </>
         )}
       </Container>
@@ -45,13 +44,14 @@ const AuthLayout: React.FC<Props> = ({
 const Container = styled.div`
   width: 100%;
   height: 100vh;
-  display: grid;
-  grid-template-columns: 0.5fr 0.5fr;
+  display: flex;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const ContentRight = styled.div`
   display: flex;
   align-items: center;
+  margin: auto;
   justify-content: center;
 `;
 

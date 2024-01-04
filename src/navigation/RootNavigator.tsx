@@ -36,30 +36,19 @@ const BannerDetail = React.lazy(() => import('../screens/banner/Detail'));
 
 const BasicConfig = React.lazy(() => import('../screens/basicConfig'));
 
-const FAQs = React.lazy(() => import('../screens/faqs'));
-const FAQsEdit = React.lazy(() => import('../screens/faqs/edit'));
-
-const FAQGroup = React.lazy(() => import('../screens/faqGroup'));
-const FAQGroupEdit = React.lazy(() => import('../screens/faqGroup/edit'));
-
 const Role = React.lazy(() => import('../screens/role'));
 const RoleEdit = React.lazy(() => import('../screens/role/Edit'));
 const RoleDetail = React.lazy(() => import('../screens/role/Detail'));
 
-const Product = React.lazy(() => import('../screens/product'));
-const ProductEdit = React.lazy(() => import('../screens/product/Edit'));
-const ProductDetail = React.lazy(() => import('../screens/product/Detail'));
+const TroubleList = React.lazy(() => import('../screens/troubleList'));
 
-const Category = React.lazy(() => import('../screens/category'));
-const CategoryEdit = React.lazy(() => import('../screens/category/Edit'));
-const CategoryDetail = React.lazy(() => import('../screens/category/Detail'));
+const ManualCollection = React.lazy(() => import('../screens/manualCollection'));
 
-const Store = React.lazy(() => import('../screens/store'));
-const StoreEdit = React.lazy(() => import('../screens/store/Edit'));
-const StoreDetail = React.lazy(() => import('../screens/store/Detail'));
+const Release = React.lazy(() => import('../screens/release'))
 
-const Region = React.lazy(() => import('../screens/region'));
-const RegionEdit = React.lazy(() => import('../screens/region/Edit'));
+const Report = React.lazy(() => import('../screens/report'))
+
+const MasterCategory = React.lazy(() => import('../screens/masterCategory'));
 
 const NotifSchedule = React.lazy(() => import('../screens/notifSchedule'));
 const NotifScheduleEdit = React.lazy(
@@ -283,122 +272,42 @@ const RootNavigator: React.FC = () => {
             }
           />
           <Route
-            path="/products"
+            path="/trouble-list"
             element={
               <PrivateRoute loginPath="/login">
-                <Product />
+                <TroubleList />
               </PrivateRoute>
             }
           />
           <Route
-            path="/products/add"
+            path="/manual-collection"
             element={
               <PrivateRoute loginPath="/login">
-                <ProductEdit />
+                <ManualCollection />
               </PrivateRoute>
             }
           />
           <Route
-            path="/products/:productId/edit"
+            path="/release"
             element={
               <PrivateRoute loginPath="/login">
-                <ProductEdit />
+                <Release />
               </PrivateRoute>
             }
           />
           <Route
-            path="/products/:productId"
+            path="/report"
             element={
               <PrivateRoute loginPath="/login">
-                <ProductDetail />
+                <Report />
               </PrivateRoute>
             }
           />
           <Route
-            path="/categories"
+            path="/master-category"
             element={
               <PrivateRoute loginPath="/login">
-                <Category />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/categories/add"
-            element={
-              <PrivateRoute loginPath="/login">
-                <CategoryEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/categories/:categoryId/edit"
-            element={
-              <PrivateRoute loginPath="/login">
-                <CategoryEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/categories/:categoryId"
-            element={
-              <PrivateRoute loginPath="/login">
-                <CategoryDetail />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/stores"
-            element={
-              <PrivateRoute loginPath="/login">
-                <Store />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/stores/add"
-            element={
-              <PrivateRoute loginPath="/login">
-                <StoreEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/stores/:storeId/edit"
-            element={
-              <PrivateRoute loginPath="/login">
-                <StoreEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/stores/:storeId"
-            element={
-              <PrivateRoute loginPath="/login">
-                <StoreDetail />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/regions"
-            element={
-              <PrivateRoute loginPath="/login">
-                <Region />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/regions/add"
-            element={
-              <PrivateRoute loginPath="/login">
-                <RegionEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/regions/:id/edit"
-            element={
-              <PrivateRoute loginPath="/login">
-                <RegionEdit />
+                <MasterCategory />
               </PrivateRoute>
             }
           />
@@ -439,54 +348,6 @@ const RootNavigator: React.FC = () => {
             element={
               <PrivateRoute loginPath="/login">
                 <TncPrivacy />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/faqs"
-            element={
-              <PrivateRoute loginPath="/login">
-                <FAQs />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/faqs/add"
-            element={
-              <PrivateRoute loginPath="/login">
-                <FAQsEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/faqs/:faqId/edit"
-            element={
-              <PrivateRoute loginPath="/login">
-                <FAQsEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/faq-group"
-            element={
-              <PrivateRoute loginPath="/login">
-                <FAQGroup />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/faq-group/add"
-            element={
-              <PrivateRoute loginPath="/login">
-                <FAQGroupEdit />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/faq-group/:faqGroupId/edit"
-            element={
-              <PrivateRoute loginPath="/login">
-                <FAQGroupEdit />
               </PrivateRoute>
             }
           />

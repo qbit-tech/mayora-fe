@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Card, Button, message } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
@@ -9,7 +10,7 @@ import { BaseResponseProps } from '../../types/config.type';
 import { useSignIn } from 'react-auth-kit';
 import { getErrorMessage, saveToken } from '@qbit-tech/libs-react';
 import axios from 'axios';
-import Paragraph from 'antd/es/typography/Paragraph';
+// import Paragraph from 'antd/es/typography/Paragraph';
 import AppVersion from '../../components/AppVersion';
 
 const Login = () => {
@@ -17,6 +18,11 @@ const Login = () => {
   const signIn = useSignIn();
 
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const ButtonContainer = styled.div`
+  .ant-btn-primary {
+    background-color: red;
+  }
+`;
 
   const _doLogin = async (data: { email: string; password: string }) => {
     setIsAuthLoading(true);
@@ -81,15 +87,11 @@ const Login = () => {
   };
 
   return (
-    <AuthLayout formPosition="left" variant='secondary'>
-      <Card style={{ width: 500 }} bordered={false}>
+    <AuthLayout formPosition="left">
+      <Card style={{ width: 500, margin: 'auto', borderRadius: '10px'}}>
         <AuthHeaderCard
-          title="Hi,
-          Welcome Back"
-          subtitle={
-            'Welcome! Please fill the Username and Password to Sign in into ' +
-            process.env.REACT_APP_WEBSITE_NAME
-          }
+          title="Manufacturing KPI Dashboard"
+          subtitle="PT Torabika Eka Semesta - OEE Creamer Division"
         />
         <Form
           layout="vertical"
@@ -121,18 +123,19 @@ const Login = () => {
               style={{
                 width: '100%',
                 display: 'flex',
-                justifyContent: 'center',
+                justifyContent: 'center'
               }}
             >
               <Button
                 loading={isAuthLoading}
                 type="primary"
                 htmlType="submit"
-                style={{ width: '70%' }}
+                style={{ width: '70%'}}
+                danger={true}
               >
                 Login
               </Button>
-            </div>
+            </div>      
           </Form.Item>
 
           <Link

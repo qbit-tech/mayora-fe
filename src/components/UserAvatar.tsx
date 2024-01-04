@@ -14,6 +14,7 @@ import { generateInitialFromName } from '../helpers/generator';
 import { getFullName } from '../helpers/name';
 import { capitalizeFirstLetter } from '../helpers/text';
 import { useAuthUser, useSignOut } from 'react-auth-kit';
+import { getLoginData } from '../helpers/auth';
 
 const UserAvatar: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const UserAvatar: React.FC = () => {
   console.info('auth()', auth());
 
   const initial = generateInitialFromName(auth()?.name!);
+  const roles = auth()?.role.roleName
+  console.log(roles)
   // const role = capitalizeFirstLetter(auth()?.userType!);
   let name = auth()?.name ? getFullName(auth()) : '';
   name = name
@@ -83,11 +86,11 @@ const UserAvatar: React.FC = () => {
         alignItems: 'center',
       }}
     >
-      <Button type="text">
+      {/* <Button type="text">
         <Badge count={5}>
           <BellOutlined style={{ fontSize: 20 }} />
         </Badge>
-      </Button>
+      </Button> */}
 
       <Dropdown menu={items}>
         <div
@@ -98,7 +101,6 @@ const UserAvatar: React.FC = () => {
             alignItems: 'center',
           }}
         >
-          <AppAvatar size="large">{initial}</AppAvatar>
           <div
             style={{
               display: 'flex',
@@ -115,6 +117,7 @@ const UserAvatar: React.FC = () => {
             >
               {/* {role} */}
             </span>
+            <div style={{display: 'flex', flexDirection: 'column'}}>
             <span
               style={{
                 marginTop: 0,
@@ -125,8 +128,11 @@ const UserAvatar: React.FC = () => {
             >
               {name}
             </span>
+            <span>
+              {roles}
+            </span>
+            </div>
           </div>
-
           <Icon />
         </div>
       </Dropdown>

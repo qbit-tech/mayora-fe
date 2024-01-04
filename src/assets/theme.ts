@@ -16,7 +16,9 @@ const theme: DefaultTheme = {
 
   colors: {
     // Main color
-    primary: '#ff0000',
+    background: "#101633",
+    primary: '#9E2A2B',
+    blue: '#0961CA',
     // secondary: '#1d2b36',
     secondary: '#264284',
     black: '#000000',
@@ -54,6 +56,11 @@ const theme: DefaultTheme = {
     yellow100: '#FFF9EF',
     yellow600: '#FAB347',
   },
+  components: {
+    Tabs: {
+      itemColor: "hsl(0, 58%, 39%)"
+    }
+  }
 };
 
 export { theme };
