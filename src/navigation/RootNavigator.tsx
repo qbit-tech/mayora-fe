@@ -50,6 +50,8 @@ const Report = React.lazy(() => import('../screens/report'))
 
 const MasterCategory = React.lazy(() => import('../screens/masterCategory'));
 
+const Target = React.lazy(() => import('../screens/target'));
+
 const NotifSchedule = React.lazy(() => import('../screens/notifSchedule'));
 const NotifScheduleEdit = React.lazy(
   () => import('../screens/notifSchedule/Edit'),
@@ -309,6 +311,14 @@ const RootNavigator: React.FC = () => {
               <PrivateRoute loginPath="/login">
                 <MasterCategory />
               </PrivateRoute>
+            }
+          />
+          <Route
+            path='/target'
+            element={
+              <PrivateRoute loginPath="/login">
+              <Target />
+            </PrivateRoute>
             }
           />
           <Route

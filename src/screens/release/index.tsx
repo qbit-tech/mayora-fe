@@ -290,7 +290,7 @@ const Categories = () => {
 
           <Divider />
 
-          <Row gutter={[16, 16]}>
+          <Row gutter={16}>
             {[1, 2, 3].map((index) => (
               <React.Fragment>
                 <Col span={8} key={index}>

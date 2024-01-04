@@ -18,6 +18,7 @@ import {
   CheckCircleOutlined,
   FileDoneOutlined,
   ProfileOutlined,
+  FundOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -95,6 +96,11 @@ const Sidebar: React.FC = () => {
       key: '/manual-collection',
       label: 'Manual Collection',
       icon: <FileTextOutlined />,
+    },
+    {
+      key: '/target',
+      label: 'Target',
+      icon: <FundOutlined />,
     },
     {
       key: '/release',
