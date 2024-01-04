@@ -4,6 +4,7 @@ import AuthContentLeft from './AuthContentLeft';
 import AuthContentLeftSecondary from './AuthContentLeftSecondary';
 import { MainCheckHealth } from '@qbit-tech/libs-react';
 import AuthContentRight from './AuthContentRight';
+import axios from 'axios';
 
 interface Props {
   variant?: 'primary' | 'secondary';
@@ -18,9 +19,9 @@ const AuthLayout: React.FC<Props> = ({
 }) => {
   return (
     <div>
-      {!!process.env.REACT_APP_CHECK_HEALTH && (
+      {/* {!!process.env.REACT_APP_CHECK_HEALTH && (
         <MainCheckHealth url={process.env.REACT_APP_CHECK_HEALTH || '/'} />
-      )}
+      )} */}
       <Container>
         {formPosition === 'right' ? (
           <>
