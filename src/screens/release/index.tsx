@@ -19,6 +19,7 @@ import {
   Button,
   Col,
   Row,
+  Divider,
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
@@ -31,6 +32,7 @@ import useFetchList from '../../hooks/useFetchList';
 import useSWR from 'swr';
 import { formatDate, PAGE_SIZE_OPTIONS } from '../../helpers/constant';
 import { initialProduct, ProductProps } from '../../types/products.type';
+import { initialRelease, ReleaseProps } from '../../types/release.type';
 import {
   CategoryProps,
   FetchAllCategoriesResponse,
@@ -69,6 +71,9 @@ const Categories = () => {
     initialProductCategories
   );
   const [isFirstRender, setIsFirstRender] = React.useState<boolean>(true);
+  const [tempRelease, setTempRelease] = React.useState<ReleaseProps>(
+    initialRelease
+  );
 
   const {
     isLoading,
@@ -81,11 +86,10 @@ const Categories = () => {
     setQuery,
     changePage,
     changeLimit,
-  } = useCustomDataFetcher<CategoryProps>({
-    endpoint: 'product/categories',
+  } = useCustomDataFetcher<ReleaseProps>({
+    endpoint: 'product/releases',
     limit: +PAGE_SIZE_OPTIONS[0],
   });
-
 
   React.useEffect(() => {
     const newSearch = queryParams.get('search') || '';
@@ -200,98 +204,62 @@ const Categories = () => {
 
   console.log(data);
 
+  const exampleData = [
+    {
+      releaseName: 'Tes1',
+      releaseAmount: 100,
+      isPublished: true,
+
+    },
+    {
+      releaseName: 'Tes2',
+      releaseAmount: 200,
+      isPublished: false,
+
+    },
+    {
+      releaseName: 'Tes3',
+      releaseAmount: 300,
+      isPublished: true,
+
+    },
+  ]
+
   const columns = [
     {
-      title: 'NAME',
-      dataIndex: 'categoryName',
-      key: 'categoryName',
-      width: 200,
-      render: (text: string, record: CategoryProps) => {
+      title: 'Time',
+      dataIndex: 'releaseName',
+      key: 'releaseName',
+      align: 'center',
+      width: '50%',
+      render: (text: string, record: ReleaseProps) => {
         return (
-          <div className="table-link" onClick={() => handleClickDetail(record)}>
-            {record?.categoryName?.includes('-')
-              ? replaceDashWithSpace(record.categoryName)
-              : record?.categoryName?.charAt(0)?.toUpperCase() +
-              record?.categoryName?.toLowerCase()?.slice(1)}
+          <div className="">
+            {record?.releaseName?.includes('-')
+              ? replaceDashWithSpace(record.releaseName)
+              : record?.releaseName?.charAt(0)?.toUpperCase() +
+              record?.releaseName?.toLowerCase()?.slice(1)}
           </div>
         );
-      },
+      }
     },
     {
-      title: 'DESCRIPTION',
-      dataIndex: 'description',
-      key: 'description',
-      align: 'left',
-      render: (description: string, record: CategoryProps) => (
-        <div style={{ textAlign: 'justify' }}>{
-          record.description ? record.description.length > 200 ?
-            <p>
-              {
-                record.description.split(/\s+/, 35).join(' ') + '...'
-              } <span style={{ color: 'blue' }}>Read more</span>
-            </p> : record.description :
-            <NotSet value='No Description' />
-        }</div>
+      title: 'Amount',
+      dataIndex: 'releaseAmount',
+      key: 'releaseAmount',
+      align: 'center',
+      width: '50%',
+      render: (text: string, record: ReleaseProps) => {
+        return (
+          <div className="">
+            {record?.releaseAmount}
+          </div>
+        );
+      }
+    },
+  ] as TableProps<ReleaseProps>['columns'];
 
-      )
-    },
-    {
-      title: 'STATUS',
-      key: 'status',
-      dataIndex: 'status',
-      render: (status: any, record: CategoryProps) => (
-        <>
-          {
-            <>
-              {/* <Switch
-              loading={record.statusLoading}
-              checked={record.isPublished}
-              onChange={() => {
-                setIsModalVisible(true);
-                setTmpData(record);
-              }}
-            /> */}
-              <Text>
-                {record.isPublished === true ?
-                  <Tag
-                    style={{
-                      border: "2px solid #31d63a",
-                      color: "#31d63a",
-                    }}>
-                    Active
-                  </Tag>
-                  :
-                  <Tag
-                    style={{
-                      border: "2px solid #D81F64",
-                      color: "#D81F64",
-                      marginBottom: "7%",
-                    }}
-                  >
-                    Inactive
-                  </Tag>}
-              </Text>
-            </>
-          }
-        </>
-      ),
-    },
-    {
-      title: 'CREATED AT',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (createdAt: any) => <div>{formatDate(createdAt)}</div>,
-    },
-    {
-      title: 'ACTION',
-      key: 'action',
-      render: (_: any, record: CategoryProps) => (
-        <Dropdown overlay={() => menu(record)} placement="bottomRight">
-          <MoreOutlined style={{ cursor: 'pointer' }} />
-        </Dropdown>
-      ),
-    },
-  ] as TableProps<CategoryProps>['columns'];
+  const totalAmount = exampleData.reduce((acc, cur) => acc + cur.releaseAmount, 0);
 
   const menu = (record: CategoryProps) => (
     <Menu onClick={(e) => handleClickAction(record, e.key)}>
@@ -306,9 +274,61 @@ const Categories = () => {
       <HeaderSection
         // icon={<TagOutlined />}
         title="Release"
-        // subtitle="Manage your Categories"
+      // subtitle="Manage your Categories"
       />
-    </React.Fragment>
+      <div style={{ height: '500px', width: '100%', backgroundColor: 'white', padding: "20px" }}>
+        <React.Fragment>
+
+          <Row>
+            <Col span={12}>
+              <Text>Data Release By System</Text>
+            </Col>
+            <Col span={12} className='text-right'>
+              <Text style={{ color: "red", fontWeight: "bold" }} >Total Release: 1198</Text>
+            </Col>
+          </Row>
+
+          <Divider />
+
+          <Row gutter={16}>
+            {[1, 2, 3].map((index) => (
+              <React.Fragment>
+                <Col span={8} key={index}>
+                  <Text style={{ fontWeight: "bold" , fontSize: 15}}>Shift {index}</Text>
+                  <Table
+                    rowKey='categoryId'
+                    columns={columns}
+                    dataSource={exampleData}
+                    loading={isLoading}
+                    pagination={false}
+                    style={{ marginTop: 10 }}
+                    footer={() => (
+                      <Row className="text-center m-0 p-0" gutter={20}>
+                        <Col span={12} className="text-center">
+                          <Text style={{ fontWeight: "bold" }}>Total</Text>
+                        </Col>
+                        <Col span={12} className='text-center'>
+                          <Text style={{ fontWeight: "bold", color: "red" }}>{totalAmount}</Text>
+                        </Col>
+                      </Row>
+                    )} />
+                </Col>
+
+              </React.Fragment>
+            ))}
+
+            <CustomPagination
+              data={data && data}
+              pagination={pagination}
+              changeLimit={changeLimit}
+              changePage={changePage}
+            />
+          </Row>
+
+        </React.Fragment>
+      </div >
+
+    </React.Fragment >
   );
 };
 

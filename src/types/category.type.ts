@@ -14,13 +14,13 @@ export interface CategoryProps {
 
 export interface FetchAllCategoriesResponse extends BaseResponsePaginationProps<CategoryProps> {
   code: string;
-    message: string;
-    payload: {
-        count: number
-        prev: string
-        next: string
-        results: CategoryProps[]
-    }
+  message: string;
+  payload: {
+    count: number
+    prev: string
+    next: string
+    results: CategoryProps[]
+  }
 }
 
 export const initialProductCategories: CategoryProps = {
