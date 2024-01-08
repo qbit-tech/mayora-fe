@@ -19,6 +19,7 @@ import {
   Button,
   Col,
   Row,
+  Divider
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
@@ -43,6 +44,8 @@ import useDetailBreadcrumbs from '../../hooks/useDetailBreadcrumbs';
 import type { TableProps } from 'antd';
 import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
+import { DownloadOutlined } from '@ant-design/icons';
+import { FileExcelOutlined } from '@ant-design/icons';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
@@ -306,8 +309,125 @@ const Categories = () => {
       <HeaderSection
         // icon={<TagOutlined />}
         title="Report"
-        // subtitle="Manage your Categories"
+      // subtitle="Manage your Categories"
       />
+
+      <div style={{ height: '500px', width: '100%', backgroundColor: 'white', padding: "20px" }}>
+        <React.Fragment>
+
+
+          <Row style={{ padding: "10px 0px 10px 0px" }}>
+            {/* <Row className='text-center'> */}
+            <Col span={24} className='text-center'>
+              <Text style={{ fontSize: "20px", fontWeight: "bold", textAlign: "center" }}>Export Report</Text>
+              <br />
+              <Text style={{ fontSize: "16px", textAlign: "center" }}>Pilih Line type, Report duration dan Week sebelum export data</Text>
+            </Col>
+          </Row>
+
+          <Row className='p-5 m-5'>
+            <Col span={24}>
+              <Row gutter={16}  >
+                <Col span={7}>
+                  <Text style={{ fontSize: "16px" }}>Line Type</Text>
+                </Col>
+
+                <Col span={7}>
+                  <Text style={{ fontSize: "16px" }}>Report Duration</Text>
+                </Col>
+
+                <Col span={6}>
+                  <Text style={{ fontSize: "16px" }}>Week</Text>
+                </Col>
+
+                <Col span={4}>
+                  {/* <Text style={{ fontSize: "16px"}}>Action</Text> */}
+                </Col>
+              </Row>
+
+              <Row gutter={16} >
+                <Col span={7}>
+                  <Select defaultValue="line" style={{ width: "100%" }}>
+                    <Option value="line">Line</Option>
+                    <Option value="whatsapp">Whatsapp</Option>
+                  </Select>
+                </Col>
+
+                <Col span={7}>
+                  <Select defaultValue="daily" style={{ width: "100%" }}>
+                    <Option value="daily">Daily</Option>
+                    <Option value="weekly">Weekly</Option>
+                    <Option value="monthly">Monthly</Option>
+                  </Select>
+                </Col>
+
+                <Col span={6}>
+                  <Select defaultValue="week" style={{ width: "100%" }}>
+                    <Option value="week">Week</Option>
+                    <Option value="week">Week</Option>
+                    <Option value="week">Week</Option>
+                  </Select>
+                </Col>
+
+                <Col span={4}>
+                  <Button type="primary" style={{ width: "100%" }}>
+                    <DownloadOutlined />
+                    Export
+                  </Button>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+
+
+          <Divider />
+
+          <Row className='my-5 py-5'>
+            <Col span={24} className='text-center'>
+              <Text style={{ fontSize: "20px", fontWeight: "bold", textAlign: "center" }}>Import Template</Text>
+              <br />
+              <Text style={{ fontSize: "16px", textAlign: "center" }}>Pilih file excel yang akan di-import dan dijadikan template untuk Report</Text>
+            </Col>
+          </Row>
+
+          <Row className='p-5'>
+            <Col span={24} className='pb-2'>
+              <Text style={{ fontSize: "16px" }}>Current Excel Template</Text>
+            </Col>
+            <Col span={24}>
+              <Row gutter={16} style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px" }}>
+                <Col span={2}>
+                  <div style = {{display: "flex", justifyContent: "center", alignItems: "center", border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "13px", backgroundColor: "#F5F5F5" }} >
+                    <FileExcelOutlined style={{ fontSize: 25 }} />
+                  </div>
+                </Col>
+                <Col span={4} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Text type='secondary' style={{ fontSize: "16px" }}>
+                    (Weekly)
+                  </Text>
+                </Col>
+                <Col span={10} style={{ display: "flex", alignItems: "center" }}>
+                  <Text style={{ fontSize: "16px" }}>
+                    Template 1.xlsx
+                  </Text>
+                </Col>
+                <Col span={4} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Button type="primary" style={{ width: "100%" }}>
+                    Replace
+                  </Button>
+                </Col>
+                <Col span={4} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Button type="primary" style={{ width: "100%" }}>
+                    Download
+                  </Button>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+
+        </React.Fragment>
+      </div >
+
     </React.Fragment>
   );
 };
