@@ -4,7 +4,8 @@ export interface ReleaseProps {
     releaseId?: string;
     releaseName: string;
     time?: Date | string;
-    releaseAmount: number;
+    amount: number;
+    shift?: number;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     isPublished: boolean;
@@ -24,6 +25,7 @@ export interface FetchAllReleasesResponse extends BaseResponsePaginationProps<Re
 
 export const initialRelease: ReleaseProps = {
     releaseName: '',
-    releaseAmount: 0,
+    amount: 0,
+    shift: 0,
     isPublished: true,
 }
