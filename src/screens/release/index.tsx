@@ -1,7 +1,7 @@
 import React from 'react';
 import AppLayout from '../layout/AppLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MoreOutlined, SearchOutlined } from '@ant-design/icons';
+import { DownOutlined, MoreOutlined, SearchOutlined } from '@ant-design/icons';
 import {
   Pagination,
   Space,
@@ -20,6 +20,7 @@ import {
   Col,
   Row,
   Divider,
+  DatePicker,
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
@@ -59,6 +60,10 @@ const Categories = () => {
   const [searchQuery, setSearchQuery] = React.useState<string | null>(new URLSearchParams(location.search).get('search'));
   const [statusValue, setStatusValue] = React.useState<string | null>(new URLSearchParams(location.search).get('status'));
   const [pageValue, setPageValue] = React.useState<string | null>(new URLSearchParams(location.search).get('page'));
+  const [machineId, setMachineId] = React.useState<string | null>(new URLSearchParams(location.search).get('machineId'));
+  const [machineValue, setMachineValue] = React.useState<string | null>(new URLSearchParams(location.search).get('machineId'));
+  const [dateValue, setDateValue] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
+  const [date, setDate] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
 
   const { setBreadcrumbDetails } = useDetailBreadcrumbs();
   // const [categories, setCategories] = React.useState<CategoryProps[]>([]);
@@ -91,90 +96,99 @@ const Categories = () => {
     limit: +PAGE_SIZE_OPTIONS[0],
   });
 
-  const handleStatusChange = async () => {
-    try {
-      setIsLoadingUpdateStatus(true);
-      const res = await httpRequest.patch<ResponseProps>(
-        'releases/' + tmpData.releaseId,
-        {
-          categoryId: tmpData.releaseId,
-        }
-      );
-
-      fetchList();
-
-      message.success('Success change ' + tmpData.releaseName + ' status.');
-
-      setIsLoadingUpdateStatus(false);
-      setIsModalVisible(false);
-      setTmpData(initialRelease);
-    } catch (error: any) {
-      message.error(error.data.message);
-      setIsModalVisible(false);
-      setTmpData(initialRelease);
-      setIsLoadingUpdateStatus(false);
-    }
-  };
-
+// 2 1 3
+  // React.useEffect(() => {
+  //   console.log("useEffect 2")
+  //   const newSearch = queryParams.get('search') || '';
+  //   const newMachineId = queryParams.get('machineId') || '';
+  //   const newPage = queryParams.get('page');
+  //   const newDate = queryParams.get('createdAt');
+  //   setSearch(newSearch);
+  //   handleChangeMachineId(newMachineId);
+  //   setDate(newDate);
+  //   if (newPage) {
+  //     changePage(parseInt(newPage), pagination.perPage);
+  //   }
+  // }, [location.search, setSearchQuery, setMachineValue, setPageValue, setDateValue]);
 
   React.useEffect(() => {
-    const newSearch = queryParams.get('search') || '';
-    const newStatus = queryParams.get('status') || '';
+    console.log("useEffect 1")
     const newPage = queryParams.get('page');
-    setSearch(newSearch);
-    handleChangeStatus(newStatus);
-    if (newPage) {
-      changePage(parseInt(newPage), pagination.perPage);
-    }
-  }, [location.search, setSearchQuery, setStatusValue, setPageValue]);
-
-  React.useEffect(() => {
-    const newPage = queryParams.get('page');
+    const newDate = queryParams.get('createdAt') || '';
+    console.log(newPage)
     if (newPage && isFirstRender) {
       setIsFirstRender(false);
-      handleFilterChange(undefined, undefined, newPage);
-      return;
+      handleFilterChange(undefined, undefined, newPage, undefined);
     }
-    handleFilterChange(undefined, undefined, pagination.page.toString());
+    else if (!isFirstRender) {
+      handleFilterChange(undefined, undefined, pagination.page.toString())
+    }
   }, [changePage]);
 
-  const handleFilterChange = (search?: string, status?: string, page?: string) => {
-    if (search && status && page) {
+
+
+  const handleFilterChange = (search?: string, machineId?: string, page?: string, createdAt?: string) => {
+   
+    if (search && machineId && page && createdAt) {
+      console.log('tesMasuk 1')
       setSearchQuery(search);
       queryParams.set('search', search);
-      setStatusValue(status);
-      queryParams.set('status', status);
+      setMachineId(machineId);
+      queryParams.set('machineId', machineId);
       setPageValue(page);
-      queryParams.set('page', page);
+      queryParams.set('pageTesIf1', page);
+      setDate(createdAt);
+      queryParams.set('createdAt', createdAt);
       setSearch(search);
-      handleChangeStatus(status);
+      handleChangeMachineId(machineId);
     }
-    else if (status || status === '') {
+     if (machineId || machineId === '') {
+      // ketika masuk machineId
+      console.log('tesMasuk 2')
       searchQuery && queryParams.set('search', searchQuery);
-      setStatusValue(status);
-      status && queryParams.set('status', status);
-      queryParams.set('page', pagination.page.toString());
-      handleChangeStatus(status);
+      setMachineId(machineId);
+      machineId && queryParams.set('machineId', machineId);
+      queryParams.set('pageTesIf2', pagination.page.toString());
+      handleChangeMachineId(machineId);
     }
-    else if (search || search === '') {
+     if (search || search === '') {
+      console.log('tesMasuk 3')
       setSearchQuery(search);
       search && queryParams.set('search', search);
-      statusValue && queryParams.set('status', statusValue);
-      queryParams.set('page', pagination.page.toString());
+      machineId && queryParams.set('machineId', machineId);
+      queryParams.set('pageTesIf3', pagination.page.toString());
       setSearch(search);
     }
-    else if (page) {
+     if (createdAt) {
+      console.log(`Ini true lagi ${createdAt}`)
+      // ketika masuk date
+      console.log('tesMasuk 5')
+      setDateValue(createdAt);
+      searchQuery && queryParams.set('search', searchQuery);
+      // machineId && queryParams.set('machineId', machineId);
+      createdAt && queryParams.set('createdAt', createdAt);
+      // queryParams.set('pageTesIf10', pagination.page.toString());
+      handleCreatedAt(createdAt);
+    }
+     if (page) {
+      // ketika home page
+      console.log('tesMasuk 4')
       setPageValue(page);
       searchQuery && queryParams.set('search', searchQuery);
-      statusValue && queryParams.set('status', statusValue);
       page && queryParams.set('page', page);
     }
 
     if (queryParams) {
+      // ketika home page
+      console.log('tesMasuk 6')
+      console.log(`${queryParams.toString()}`)
+      console.log(`${queryParams}`)
       const queryString = queryParams.toString();
-      window.history.pushState(null, '', `?${queryString}`);
+      console.log(`Ini query ${queryString}`)
+      window.history.replaceState(null, '', `?${queryString}`);
     }
-  };
+  }
+  
 
 
   const { Option } = Select;
@@ -187,6 +201,14 @@ const Categories = () => {
       setQuery((oldVal) => ({ ...oldVal, isPublished: '' }));
     }
   };
+
+  const handleChangeMachineId = (machineId: string) => {
+    setQuery((oldVal) => ({ ...oldVal, machineId: machineId }));
+  }
+
+  const handleCreatedAt = (createdAt: string) => {
+    setQuery((oldVal) => ({ ...oldVal, createdAt: createdAt }));
+  }
 
 
   console.log(data);
@@ -223,6 +245,34 @@ const Categories = () => {
       <HeaderSection
         // icon={<TagOutlined />}
         title="Release"
+        rightAction={
+          <React.Fragment>
+            <Dropdown overlay={
+              <Menu>             
+                {
+                  data.map((record) => (
+                    <Menu.Item key={record.machineId} onClick={() => handleFilterChange(undefined, record.machineId, undefined, undefined)}>
+                      {record.machineId}
+                    </Menu.Item>
+                  ))
+                }
+              </Menu>
+            }>
+              <Button>
+                <span className="mr-2">
+                  {
+                    machineId
+                  }
+                </span>
+                <DownOutlined />
+              </Button>
+            </Dropdown>
+            <DatePicker style={{ marginLeft: 10 }} onChange={(date, dateString) => {
+              console.log(date, dateString);
+              handleFilterChange(undefined, undefined, undefined, dateString);
+            }} />
+          </React.Fragment>
+        }
       // subtitle="Manage your Categories"
       />
       <div style={{ height: '500px', width: '100%', backgroundColor: 'white', padding: "20px" }}>
@@ -286,7 +336,7 @@ const Categories = () => {
           </Row>
 
         </React.Fragment>
-      </div >
+      </div>
 
     </React.Fragment >
   );
