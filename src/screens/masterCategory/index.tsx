@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppLayout from '../layout/AppLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FolderOpenOutlined, CheckOutlined, FormOutlined, MoreOutlined, TagOutlined} from '@ant-design/icons';
+import { FolderOpenOutlined, CheckOutlined, FormOutlined, MoreOutlined, TagOutlined, PlusSquareOutlined} from '@ant-design/icons';
 import {
   Pagination,
   Space,
@@ -20,7 +20,8 @@ import {
   Col,
   Row,
   Tabs,
-  Tree
+  Tree,
+  Spin
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
@@ -47,132 +48,118 @@ import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
 import { TabsProps } from 'antd/lib';
 import { DataNode } from 'antd/es/tree';
+import Category from '../../components/Category/Category';
+import { CategoryLevel2, ICategoryListItem } from '../../data/model';
+import TabPane from '../../components/Category/TabPane';
+import { ModalAddCategoryView } from '../../components/Category/ModalAdd';
+import axios from 'axios';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
 }
 
-const { Text } = Typography;
-
 const Categories = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  const [showLine, setShowLine] = useState<boolean>(true);
-  const [showIcon, setShowIcon] = useState<boolean>(false);
-  const [showLeafIcon, setShowLeafIcon] = useState<boolean | React.ReactNode>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [selectedLv2, setSelectedlv2] = useState<string>('')
+  const [isLoadingTransaction, setIsLoading] = useState<boolean>(false)
+  const [name, setName] = useState<string>('')
+  const [categoryType, setCategoryType] = useState<string>('manualcollection')
+  const [unit, setUnit] = useState<string>('unit1')
 
-  const onSelect = (selectedKeys: React.Key[], info: any) => {
-    console.log('selected', selectedKeys, info);
-  };
-  
-  const onChange = (key: string) => {
-    console.log(key);
-  };
+  const {
+		isLoading,
+		data,
+    fetchList
+	} = useFetchList<ICategoryListItem>({
+		endpoint: "categoryParent",
+	});
 
-  const treeData: DataNode[] = [
-    {
-      title: 'parent 1',
-      key: '0-0',
-      icon: <FolderOpenOutlined />,
-      children: [
-        {
-          title: 'parent 1-0',
-          key: '0-0-0',
-          icon: <FolderOpenOutlined />,
-          children: [
-            { title: 'leaf', key: '0-0-0-0', icon: <TagOutlined /> },
-            { title: 'leaf', key: '0-0-0-2', icon: <TagOutlined /> },
-          ],
-        },
-        {
-          title: 'parent 1-1',
-          key: '0-0-1',
-          icon: <FolderOpenOutlined />,
-          children: [{ title: 'leaf', key: '0-0-1-0', icon: <TagOutlined /> }],
-        },
-        {
-          title: 'parent 1-2',
-          key: '0-0-2',
-          icon: <FolderOpenOutlined />,
-          children: [
-            { title: 'leaf', key: '0-0-2-0', icon: <TagOutlined /> },
-            {
-              title: 'leaf',
-              key: '0-0-2-1',
-              icon: <FolderOpenOutlined />,
-              switcherIcon: <FormOutlined />,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      title: 'parent 2',
-      key: '0-1',
-      icon: <FolderOpenOutlined />,
-      children: [
-        {
-          title: 'parent 2-0',
-          key: '0-1-0',
-          icon: <FolderOpenOutlined />,
-          children: [
-            { title: 'leaf', key: '0-1-0-0', icon: <FolderOpenOutlined /> },
-            { title: 'leaf', key: '0-1-0-1', icon: <FolderOpenOutlined /> },
-          ],
-        },
-      ],
-    },
-  ];
 
-  const TabPane1 = () => {
-    return(
-      <div style={{height : '500px', width: '100%', backgroundColor: 'white'}}>
-        <div>
-      <Tree
-        showLine={ true }
-        showIcon={true}
-        defaultExpandedKeys={['0-0-0']}
-        onSelect={onSelect}
-        treeData={treeData}
-      />
-    </div>
-      </div>
-    )
+  const addNewCategory = async() =>{
+    if (name === "" || name === null || name === undefined) {
+        return message.error("Category Name is required");
+    }
+
+    if (categoryType === "" || categoryType === null || categoryType === undefined) {
+        return message.error("Category Type is required");
+    }
+
+    if (unit === "" || unit === null || unit === undefined) {
+        return message.error("Unit is required");
+    }
+
+    try {
+        setIsLoading(true)
+        await axios.post(
+          process.env.REACT_APP_BASE_URL + '/category',
+          {
+            categoryParentId:selectedLv2,
+            name,
+            categoryType,
+            unit
+          }
+        );
+        message.success("Successfully created category");
+        setIsLoading(false)
+        await fetchList()
+    } catch (error) {
+        setIsLoading(false)
+        return message.error("Error create category");
+    }
   }
-  
-  const tabItems: TabsProps['items'] = [
-    {
-      key: '1',
-      label: 'Not Operating Day & Planned Down Time',
-      children: TabPane1(),
-    },
-    {
-      key: '2',
-      label: 'Down Time Losses',
-      children: 'Content of Tab Pane 2',
-    },
-    {
-      key: '3',
-      label: 'Speed Losses',
-      children: 'Content of Tab Pane 3',
-    },
-    {
-      key: '4',
-      label: 'Defect & Rework Losses',
-      children: 'Content of Tab Pane 3',
-    },
-  ];
-  
 
+  const getTreeData = (parentCategory: CategoryLevel2[]) => {
+    return parentCategory.map((item) => ({
+      title: item.name,
+      key: item.id,
+      icon: <FolderOpenOutlined />,
+      children: [
+        {
+          title: <Button type="primary" onClick={()=>{setIsModalOpen(true); setSelectedlv2(item.id)}}>Add New Category</Button>, 
+          key: 'BUTTON'
+        },
+        ...item.level3.map(lv3 =>({
+          title: <Category {...lv3} fetchList={fetchList} parentId={lv3.categoryParentId}/>, 
+          key: lv3.id
+        }))
+      ]
+    }));
+  }
+
+
+  const tabItems: TabsProps['items'] =  data.map((item) => ({
+    key: item.id,
+    label: item.name,
+    children: <TabPane treeData={getTreeData(item.level2)}/>,
+  }));
+  
   return (
     <React.Fragment>
       <HeaderSection
-        // icon={<TagOutlined />}
         title="Master Category"
       />
       <div>
-        <Tabs defaultActiveKey="1" items={tabItems} type="card" onChange={onChange} />;
+        {
+          isLoading ? <Spin /> :
+          <>
+            <Tabs defaultActiveKey="1" items={tabItems} type="card" />
+            <ModalAddCategoryView
+              setName={setName}
+              setUnit={setUnit}
+              setCategoryType={setCategoryType}
+              isModal={true}
+              isModalOpen={isModalOpen}
+              onClose={() => {
+                addNewCategory()
+                setIsModalOpen(false);
+              } }
+              onSuccess={() => {
+                setIsModalOpen(false);
+              } }
+              onModalCancel={() => setIsModalOpen(false)}
+            />
+          </>
+        }
       </div>
       
     </React.Fragment>
@@ -188,8 +175,3 @@ export const ContainerFilter = styled.div`
 `;
 
 export default Categories;
-
-function sortCategories(categories: CategoryProps[]) {
-  categories.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
-  return categories;
-}
