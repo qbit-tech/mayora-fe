@@ -25,7 +25,7 @@ const ContainerStyle = styled.div`
   height: 500px;
   background-color: white;
 
-  .ant-tree-switcher-leaf-line{
+  .ant-tree-switcher-leaf-line, .ant-tree-indent-unit-start{
     opacity: 0;
   }
 `;
