@@ -2,10 +2,11 @@ import { BaseResponsePaginationProps } from './config.type';
 
 export interface ReleaseProps {
     releaseId?: string;
-    releaseName: string;
+    machineId?: any;
     time?: Date | string;
-    releaseAmount: number;
-    createdAt?: Date | string;
+    amount: number;
+    shift?: number;
+    createdAt?: Date;
     updatedAt?: Date | string;
     isPublished: boolean;
     statusLoading?: boolean;
@@ -23,7 +24,8 @@ export interface FetchAllReleasesResponse extends BaseResponsePaginationProps<Re
 }
 
 export const initialRelease: ReleaseProps = {
-    releaseName: '',
-    releaseAmount: 0,
+    machineId: '',
+    amount: 0,
+    shift: 0,
     isPublished: true,
 }
