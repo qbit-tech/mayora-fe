@@ -49,6 +49,10 @@ import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
 import { TabsProps } from 'antd/lib';
 import { DataNode } from 'antd/es/tree';
+import InputDefaultTarget from './modal/InputDefaultTarget';
+import InputCurrentTarget from './modal/InputCurrentTarget';
+import InputOeeTarget from './modal/InputOeeTarget';
+
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
     payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
@@ -60,9 +64,9 @@ const Categories = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [showLine, setShowLine] = useState<boolean>(true);
-    const [showIcon, setShowIcon] = useState<boolean>(false);
-    const [showLeafIcon, setShowLeafIcon] = useState<boolean | React.ReactNode>(true);
+    const [isDefautModalVisible, setIsDefaultModalVisible] = useState(false);
+    const [isCurrentModalVisible, setIsCurrentModalVisible] = useState(false);
+    const [isOeeModalVisible, setIsOeeModalVisible] = useState(false);
 
     const onSelect = (selectedKeys: React.Key[], info: any) => {
         console.log('selected', selectedKeys, info);
@@ -91,6 +95,31 @@ const Categories = () => {
         endpoint: 'product/target',
         limit: +PAGE_SIZE_OPTIONS[0],
     });
+
+    const handleEditClickDefault = () => {
+        setIsDefaultModalVisible(true);
+    };
+
+    const handleModalCancelDefault = () => {
+        setIsDefaultModalVisible(false);
+    };
+
+    const handleEditClickCurrent = () => {
+        setIsCurrentModalVisible(true);
+    }
+
+    const handleModalCancelCurrent = () => {
+        setIsCurrentModalVisible(false);
+    }
+
+    const handleEditClickOee = () => {
+        setIsOeeModalVisible(true);
+    }
+
+    const handleModalCancelOee = () => {
+        setIsOeeModalVisible(false);
+    }
+    
 
     const exampleData = [
         {
@@ -191,7 +220,7 @@ const Categories = () => {
                                     <Text style={{ fontSize: 40, fontWeight: "bold" }}>3000</Text>
                                 </Col>
                                 <Col offset={1}>
-                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }}>
+                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }} onClick={handleEditClickDefault}>
                                         Edit
                                     </Link>
                                 </Col>
@@ -216,7 +245,7 @@ const Categories = () => {
                                     <Text style={{ fontSize: 40, fontWeight: "bold" }}>3000</Text>
                                 </Col>
                                 <Col offset={1}>
-                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }}>
+                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }} onClick={handleEditClickCurrent}>
                                         Edit
                                     </Link>
                                 </Col>
@@ -264,7 +293,7 @@ const Categories = () => {
                                     <Text style={{ fontSize: 40, fontWeight: "bold" }}>90%</Text>
                                 </Col>
                                 <Col offset={1}>
-                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }}>
+                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }} onClick={handleEditClickOee}>
                                         Edit
                                     </Link>
                                 </Col>
@@ -319,6 +348,9 @@ const Categories = () => {
                 <Tabs defaultActiveKey="1" items={tabItems} type="card" onChange={onChange} />
             </div>
 
+            <InputDefaultTarget visibleInputDefaultTarget={isDefautModalVisible} onCancelInputDefaultTarget={handleModalCancelDefault} />
+            <InputCurrentTarget visibleInputCurrentTarget={isCurrentModalVisible} onCancelInputCurrentTarget={handleModalCancelCurrent} />
+            <InputOeeTarget visibleInputOeeTarget={isOeeModalVisible} onCancelInputOeeTarget={handleModalCancelOee} />
         </React.Fragment>
     );
 
