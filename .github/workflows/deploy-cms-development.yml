@@ -59,11 +59,11 @@ jobs:
           echo REACT_APP_ID=sample >> .env.development
           echo REACT_APP_VERSION_NAME=${{ steps.package-json.outputs.version }} >> .env.development
           echo REACT_APP_STAGE=development >> .env.development
-          echo REACT_APP_WEBSITE_NAME="CMS System" >> .env.development
+          echo REACT_APP_WEBSITE_NAME="MAYORA" >> .env.development
           echo REACT_APP_WEBSITE_SUBTITLE="Manage your data here" >> .env.development
-          echo REACT_APP_BASE_URL=https://base-api-development.qbit.co.id >> .env.development
-          echo REACT_APP_CHECK_HEALTH_URL=https://base-api-development.qbit.co.id >> .env.development
-          echo REACT_APP_CMS_BASE_URL=https://base-cms-development.qbit.co.id >> .env.development
+          echo REACT_APP_BASE_URL=https://mayora-api-development.qbit.co.id >> .env.development
+          echo REACT_APP_CHECK_HEALTH_URL=https://mayora-api-development.qbit.co.id >> .env.development
+          echo REACT_APP_CMS_BASE_URL=https://mayora-cms-development.qbit.co.id >> .env.development
           echo REACT_APP_AZURE_ENTRA_APP_ID=${{ secrets.AZURE_ENTRA_APP_ID }} >> .env.development
           cat .env.development
 
@@ -101,8 +101,8 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            🏡 BASE (SAMPLE) CMS development v${{ steps.package-json.outputs.version }} 🏡
+            🏡 MAYORA CMS development v${{ steps.package-json.outputs.version }} 🏡
             Has been deployed by ${{ github.actor }}
 
-            https://base-cms-development.qbit.co.id/
+            https://mayora-cms-development.qbit.co.id/
             Ready for test. Thanks
