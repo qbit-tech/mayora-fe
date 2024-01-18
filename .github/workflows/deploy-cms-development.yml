@@ -56,14 +56,14 @@ jobs:
       - name: "Create env.development file"
         run: |
           touch .env.development
-          echo REACT_APP_ID=sample >> .env.development
+          echo REACT_APP_ID=mayora >> .env.development
           echo REACT_APP_VERSION_NAME=${{ steps.package-json.outputs.version }} >> .env.development
           echo REACT_APP_STAGE=development >> .env.development
           echo REACT_APP_WEBSITE_NAME="MAYORA" >> .env.development
           echo REACT_APP_WEBSITE_SUBTITLE="Manage your data here" >> .env.development
-          echo REACT_APP_BASE_URL=https://mayora-api-development.qbit.co.id >> .env.development
-          echo REACT_APP_CHECK_HEALTH_URL=https://mayora-api-development.qbit.co.id >> .env.development
-          echo REACT_APP_CMS_BASE_URL=https://mayora-cms-development.qbit.co.id >> .env.development
+          echo REACT_APP_BASE_URL=https://mayora-api-development.qode.biz.id >> .env.development
+          echo REACT_APP_CHECK_HEALTH_URL=https://mayora-api-development.qode.biz.id >> .env.development
+          echo REACT_APP_CMS_BASE_URL=https://mayora-cms-development.qode.biz.id >> .env.development
           echo REACT_APP_AZURE_ENTRA_APP_ID=${{ secrets.AZURE_ENTRA_APP_ID }} >> .env.development
           cat .env.development
 
@@ -83,7 +83,7 @@ jobs:
           # source: ".,!node_modules"
           source: "./build"
           # The path is based on the directory where the user logged into the server starts
-          target: "/var/www/html/apps/base-cms-development"
+          target: "/var/www/html/apps/mayora-cms-development"
           rm: true
 
       - name: Restart nginx
@@ -104,5 +104,5 @@ jobs:
             🏡 MAYORA CMS development v${{ steps.package-json.outputs.version }} 🏡
             Has been deployed by ${{ github.actor }}
 
-            https://mayora-cms-development.qbit.co.id/
+            https://mayora-cms-development.qode.biz.id
             Ready for test. Thanks
