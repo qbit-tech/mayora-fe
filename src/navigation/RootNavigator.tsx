@@ -43,6 +43,8 @@ const RoleDetail = React.lazy(() => import('../screens/role/Detail'));
 const TroubleList = React.lazy(() => import('../screens/troubleList'));
 
 const ManualCollection = React.lazy(() => import('../screens/manualCollection'));
+const ManualCollectionDetail = React.lazy(() => import('../screens/manualCollection/Detail'));
+const ManualCollectionEdit = React.lazy(() => import('../screens/manualCollection/Edit'));
 
 const Release = React.lazy(() => import('../screens/release'))
 
@@ -289,6 +291,14 @@ const RootNavigator: React.FC = () => {
               </PrivateRoute>
             }
           />
+           {/* <Route
+            path="/manual-collection/edit/:id"
+            element={
+              <PrivateRoute loginPath="/login">
+                <ManualCollectionEdit />
+              </PrivateRoute>
+            }
+          /> */}
           <Route
             path="/release"
             element={

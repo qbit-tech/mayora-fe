@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AppLayout from '../layout/AppLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MoreOutlined, SearchOutlined } from '@ant-design/icons';
+import { FolderOpenOutlined, CheckOutlined, FormOutlined, MoreOutlined, TagOutlined, PlusSquareOutlined, CarryOutOutlined} from '@ant-design/icons';
 import {
   Pagination,
   Space,
@@ -19,6 +19,9 @@ import {
   Button,
   Col,
   Row,
+  Tabs,
+  Tree,
+  Spin
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
@@ -43,273 +46,110 @@ import useDetailBreadcrumbs from '../../hooks/useDetailBreadcrumbs';
 import type { TableProps } from 'antd';
 import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
+import { TabsProps } from 'antd/lib';
+import { DataNode } from 'antd/es/tree';
+import Category from '../../components/Category/Category';
+import { CategoryLevel2, CategoryList, ICategoryListItem } from '../../data/model';
+import TabPane from '../../components/Category/TabPane';
+import axios from 'axios';
+import { IManualollectionListItem } from '../../data/model/manual-collection';
+import ManualTable from '../../components/manual-collection/Category';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
 }
 
-const { Text } = Typography;
-
 const Categories = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const [searchQuery, setSearchQuery] = React.useState<string | null>(new URLSearchParams(location.search).get('search'));
-  const [statusValue, setStatusValue] = React.useState<string | null>(new URLSearchParams(location.search).get('status'));
-  const [pageValue, setPageValue] = React.useState<string | null>(new URLSearchParams(location.search).get('page'));
-
-  const { setBreadcrumbDetails } = useDetailBreadcrumbs();
-  // const [categories, setCategories] = React.useState<CategoryProps[]>([]);
-  // const [isLoading, setIsLoading] =
-  //   React.useState<boolean>(false);
-  const [isLoadingUpdateStatus, setIsLoadingUpdateStatus] =
-    React.useState<boolean>(false);
-  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
-  const [tmpData, setTmpData] = React.useState<CategoryProps>(
-    initialProductCategories
-  );
-  const [isFirstRender, setIsFirstRender] = React.useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [selectedLv2, setSelectedlv2] = useState<string>('')
+  const [isLoadingTransaction, setIsLoading] = useState<boolean>(false)
+  const [name, setName] = useState<string>('')
+  const [categoryType, setCategoryType] = useState<string>('manualcollection')
+  const [unit, setUnit] = useState<string>('unit1')
 
   const {
-    isLoading,
-    setIsLoading,
-    data,
-    pagination,
-    // setData,
-    setSearch,
-    fetchList,
-    setQuery,
-    changePage,
-    changeLimit,
-  } = useCustomDataFetcher<CategoryProps>({
-    endpoint: 'product/categories',
-    limit: +PAGE_SIZE_OPTIONS[0],
-  });
+		isLoading,
+		data,
+    fetchList
+	} = useFetchList<ICategoryListItem>({
+		endpoint: "categoryParent/manual-collection",
+	});
 
 
-  React.useEffect(() => {
-    const newSearch = queryParams.get('search') || '';
-    const newStatus = queryParams.get('status') || '';
-    const newPage = queryParams.get('page');
-    setSearch(newSearch);
-    handleChangeStatus(newStatus);
-    if (newPage) {
-      changePage(parseInt(newPage), pagination.perPage);
-    }
-  }, [location.search, setSearchQuery, setStatusValue, setPageValue]);
-
-  React.useEffect(() => {
-    const newPage = queryParams.get('page');
-    if (newPage && isFirstRender) {
-      setIsFirstRender(false);
-      handleFilterChange(undefined, undefined, newPage);
-      return;
-    }
-    handleFilterChange(undefined, undefined, pagination.page.toString());
-  }, [changePage]);
-
-  const handleFilterChange = (search?: string, status?: string, page?: string) => {
-    if (search && status && page) {
-      setSearchQuery(search);
-      queryParams.set('search', search);
-      setStatusValue(status);
-      queryParams.set('status', status);
-      setPageValue(page);
-      queryParams.set('page', page);
-      setSearch(search);
-      handleChangeStatus(status);
-    }
-    else if (status || status === '') {
-      searchQuery && queryParams.set('search', searchQuery);
-      setStatusValue(status);
-      status && queryParams.set('status', status);
-      queryParams.set('page', pagination.page.toString());
-      handleChangeStatus(status);
-    }
-    else if (search || search === '') {
-      setSearchQuery(search);
-      search && queryParams.set('search', search);
-      statusValue && queryParams.set('status', statusValue);
-      queryParams.set('page', pagination.page.toString());
-      setSearch(search);
-    }
-    else if (page) {
-      setPageValue(page);
-      searchQuery && queryParams.set('search', searchQuery);
-      statusValue && queryParams.set('status', statusValue);
-      page && queryParams.set('page', page);
+  const addNewCategory = async() =>{
+    if (name === "" || name === null || name === undefined) {
+        return message.error("Category Name is required");
     }
 
-    if (queryParams) {
-      const queryString = queryParams.toString();
-      window.history.pushState(null, '', `?${queryString}`);
+    if (categoryType === "" || categoryType === null || categoryType === undefined) {
+        return message.error("Category Type is required");
     }
-  };
 
-
-  const { Option } = Select;
-
-  const handleChangeStatus = (status: string) => {
-
-    if (status !== 'all') {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: status }));
-    } else {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: '' }));
+    if (unit === "" || unit === null || unit === undefined) {
+        return message.error("Unit is required");
     }
-  };
-
-  const handleClickDetail = (e: CategoryProps) => {
-    navigate(`/categories/${e.categoryId}`);
-  };
-
-  const handleClickAction = (props: CategoryProps, key: string) => {
-    if (key === 'detail') {
-      navigate(`/categories/${props.categoryId}`);
-    } else if (key === 'edit') {
-      navigate(`/categories/${props.categoryId}/edit`);
-    } else if (key === 'delete') {
-      setIsModalVisible(true)
-      setTmpData(props);
-      console.log(tmpData)
-    }
-  };
-
-  const handleDelete = async (props: CategoryProps) => {
-    const { categoryId } = props;
 
     try {
-      setIsLoading(true);
-
-      const res = await httpRequest.delete<any>(
-        `/product/categories/${categoryId}`
-      )
-
-      fetchList()
-
-      message.success(`Delete category ${tmpData.categoryName} success`);
-      setIsLoading(false);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-    } catch (error: any) {
-      message.error(error.data.message);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-      setIsLoading(false);
+        setIsLoading(true)
+        await axios.post(
+          process.env.REACT_APP_BASE_URL + '/category',
+          {
+            categoryParentId:selectedLv2,
+            name,
+            categoryType,
+            unit
+          }
+        );
+        message.success("Successfully created category");
+        setIsLoading(false)
+        await fetchList()
+    } catch (error) {
+        setIsLoading(false)
+        return message.error("Error create category");
     }
   }
 
-  console.log(data);
+  const getTreeData = (parentCategory: CategoryLevel2[]) => {
+    return parentCategory.map((item) => ({
+      title: item.name,
+      key: item.id,
+      icon: <FolderOpenOutlined />,
+      children: item.level3.map(lv3 =>({
+        title: lv3.name, 
+        key: lv3.id,
+        icon: <FolderOpenOutlined />,
+        children:[{
+          title: <ManualTable data={lv3.manualCollection} fetchList={fetchList}/>, 
+          key: `manual-${lv3.id}`
+        }]
+        
+      }))
+    }));
+  }
 
-  const columns = [
-    {
-      title: 'NAME',
-      dataIndex: 'categoryName',
-      key: 'categoryName',
-      width: 200,
-      render: (text: string, record: CategoryProps) => {
-        return (
-          <div className="table-link" onClick={() => handleClickDetail(record)}>
-            {record?.categoryName?.includes('-')
-              ? replaceDashWithSpace(record.categoryName)
-              : record?.categoryName?.charAt(0)?.toUpperCase() +
-              record?.categoryName?.toLowerCase()?.slice(1)}
-          </div>
-        );
-      },
-    },
-    {
-      title: 'DESCRIPTION',
-      dataIndex: 'description',
-      key: 'description',
-      align: 'left',
-      render: (description: string, record: CategoryProps) => (
-        <div style={{ textAlign: 'justify' }}>{
-          record.description ? record.description.length > 200 ?
-            <p>
-              {
-                record.description.split(/\s+/, 35).join(' ') + '...'
-              } <span style={{ color: 'blue' }}>Read more</span>
-            </p> : record.description :
-            <NotSet value='No Description' />
-        }</div>
-
-      )
-    },
-    {
-      title: 'STATUS',
-      key: 'status',
-      dataIndex: 'status',
-      render: (status: any, record: CategoryProps) => (
-        <>
-          {
-            <>
-              {/* <Switch
-              loading={record.statusLoading}
-              checked={record.isPublished}
-              onChange={() => {
-                setIsModalVisible(true);
-                setTmpData(record);
-              }}
-            /> */}
-              <Text>
-                {record.isPublished === true ?
-                  <Tag
-                    style={{
-                      border: "2px solid #31d63a",
-                      color: "#31d63a",
-                    }}>
-                    Active
-                  </Tag>
-                  :
-                  <Tag
-                    style={{
-                      border: "2px solid #D81F64",
-                      color: "#D81F64",
-                      marginBottom: "7%",
-                    }}
-                  >
-                    Inactive
-                  </Tag>}
-              </Text>
-            </>
-          }
-        </>
-      ),
-    },
-    {
-      title: 'CREATED AT',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (createdAt: any) => <div>{formatDate(createdAt)}</div>,
-    },
-    {
-      title: 'ACTION',
-      key: 'action',
-      render: (_: any, record: CategoryProps) => (
-        <Dropdown overlay={() => menu(record)} placement="bottomRight">
-          <MoreOutlined style={{ cursor: 'pointer' }} />
-        </Dropdown>
-      ),
-    },
-  ] as TableProps<CategoryProps>['columns'];
-
-  const menu = (record: CategoryProps) => (
-    <Menu onClick={(e) => handleClickAction(record, e.key)}>
-      <Menu.Item key="edit">Edit Category</Menu.Item>
-      <Menu.Item key="detail">Detail Category</Menu.Item>
-      <Menu.Item key="delete">Delete Category</Menu.Item>
-    </Menu>
-  );
-
+  const tabItems: TabsProps['items'] =  data.map((item) => ({
+    key: item.id,
+    label: item.name,
+    children: <TabPane treeData={getTreeData(item.level2)}/>,
+  }));
+  
   return (
     <React.Fragment>
       <HeaderSection
-        // icon={<TagOutlined />}
         title="Manual Collection"
-        // subtitle="Manage your Categories"
       />
+      <div>
+        {
+          isLoading ? <Spin /> :
+          <>
+            <Tabs defaultActiveKey="1" items={tabItems} type="card" />
+          </>
+        }
+      </div>
+      
     </React.Fragment>
   );
+
 };
 
 export const ContainerFilter = styled.div`
@@ -320,4 +160,3 @@ export const ContainerFilter = styled.div`
 `;
 
 export default Categories;
-
