@@ -1,3 +1,5 @@
+import { IManualollectionListItem } from "../manual-collection";
+
 export interface ICategoryListItem {
   id: string;
   name: string;
@@ -32,4 +34,5 @@ export interface CategoryList {
   updatedAt: Date;
   createdAt: Date;
   unit: string;
+  manualCollection: IManualollectionListItem[]
 }
