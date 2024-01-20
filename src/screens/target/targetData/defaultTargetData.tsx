@@ -26,13 +26,16 @@ const DefaultTargetData = () => {
         limit: +PAGE_SIZE_OPTIONS[0],
     });
     
-
+    React.useEffect(() => {
+        fetchList();
+    }, []);
 
     return (
         <React.Fragment>
 
                 {
-                    data.length > 0 && data[0].target
+                    // data ? data.length > 0 && data[0].target : '-'
+                    data.length === 0 ? 'NaN' : data[0].target
                 }
 
         </React.Fragment>

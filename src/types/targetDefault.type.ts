@@ -6,6 +6,8 @@ export interface TargetDefaultProps {
     machineId: string;
     name: string;
     role: string;
+    createdBy?: string;
+    updatedBy?: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     isPublished?: boolean;

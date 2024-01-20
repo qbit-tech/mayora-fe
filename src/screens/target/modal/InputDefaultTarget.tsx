@@ -3,6 +3,8 @@ import {
     Modal,
     Input,
     Typography,
+    message,
+    Form,
 } from 'antd';
 import {
     BaseResponseProps,
@@ -10,6 +12,10 @@ import {
 import styled from 'styled-components';
 import { initialProduct, ProductProps } from '../../../types/products.type';
 import { initialTarget, TargetProps } from '../../../types/target.type';
+import { initialTargetDefault, TargetDefaultProps } from '../../../types/targetDefault.type';
+import { initialTargetOEE, TargetOEEProps } from '../../../types/targetOEE.type';
+import { httpRequest } from '../../../helpers/api';
+import { useNavigate } from 'react-router-dom';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
     payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
@@ -26,35 +32,86 @@ interface ModalComponentProps {
 const InputDefaultTarget: React.FC<ModalComponentProps> = ({ visibleInputDefaultTarget, onCancelInputDefaultTarget }) => {
 
 
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
+    const [isLoadingAction, setIsLoadingAction] = React.useState<boolean>(false);
+    const [form] = Form.useForm();
+    // const [faqs, setFaqs] = React.useState<FAQSProps>(initialFaqs);
+    const [field, setField] = React.useState<TargetDefaultProps>(initialTargetDefault);
+    const navigate = useNavigate();
+
     const [tempRelease, setTempRelease] = React.useState<TargetProps>(
         initialTarget
     );
 
 
+    const createTarget = async (props: Omit<TargetDefaultProps, 'statusLoading'>) => {
+        try {
+            setIsLoadingAction(true);
+            const dataToSent = {
+                target: field.target,
+                createdBy: JSON.parse(localStorage.getItem('_auth_state') || '{}')?.userId,
+                updatedBy: JSON.parse(localStorage.getItem('_auth_state') || '{}')?.userId,
+            };
+
+            console.log(props);
+
+            await httpRequest.post('/defaultTargets', dataToSent)
+
+            message.success('Success create new target');
+            navigate(0)
+        }
+        catch (err) {
+            message.error('Failed create new target');
+        }
+        finally {
+            setIsLoadingAction(false);
+            // visibleInputDefaultTarget = false;
+            onCancelInputDefaultTarget();
+        }
+    };
 
 
 
     return (
         <React.Fragment>
 
-            <Modal 
-                title={ <div className='text-start'>Set New Default Target</div> }
-                centered 
+            <Modal
+                title={<div className='text-start'>Set New Default Target</div>}
+                centered
                 visible={visibleInputDefaultTarget}
                 onCancel={onCancelInputDefaultTarget}
+                onOk={() => form.submit()}
             >
-                
+
                 <Text>Target</Text>
-                <Input
-                    placeholder="Default Target"
-                    value={tempRelease.name}
-                    onChange={(e) =>
-                        setTempRelease({
-                            ...tempRelease,
-                            name: e.target.value,
-                        })
-                    }
-                />
+                <Form
+                    form={form}
+                    name="defaultTargetForm"
+                    layout="vertical"
+                    onFinish={createTarget}
+                    autoComplete="off"
+                >
+                    <Form.Item
+                        name="target"
+                        label="Target"
+                        rules={[{ required: true, message: 'Please input target' }]}
+                    >
+                        <Input
+                            placeholder="Default Target"
+                            value={field.target}
+                            onChange={(e) =>
+                                // setTempRelease({
+                                //     ...tempRelease,
+                                //     name: e.target.value,
+                                // })
+                                setField({
+                                    ...field,
+                                    target: e.target.value,
+                                })
+                            }
+                        />
+                    </Form.Item>
+                </Form>
 
             </Modal>
 
@@ -62,12 +119,5 @@ const InputDefaultTarget: React.FC<ModalComponentProps> = ({ visibleInputDefault
     );
 
 };
-
-export const ContainerFilter = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-`;
 
 export default InputDefaultTarget;

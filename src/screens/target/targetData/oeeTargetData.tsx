@@ -32,7 +32,7 @@ const OEETargetData = () => {
         <React.Fragment>
 
                 {
-                    data.length > 0 && data[0].target
+                    data.length === 0 ? 'NaN' : data[0].target
                 }
 
         </React.Fragment>
