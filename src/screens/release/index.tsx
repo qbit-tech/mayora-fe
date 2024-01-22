@@ -46,6 +46,7 @@ import useDetailBreadcrumbs from '../../hooks/useDetailBreadcrumbs';
 import type { TableProps } from 'antd';
 import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
+import moment from 'moment';
 
 interface ResponseProps extends BaseResponseProps<ReleaseProps> {
   payload: Omit<ReleaseProps, 'createdAt' | 'updatedAt'>;
@@ -96,7 +97,7 @@ const Categories = () => {
     limit: +PAGE_SIZE_OPTIONS[0],
   });
 
-// 2 1 3
+  // 2 1 3
   // React.useEffect(() => {
   //   console.log("useEffect 2")
   //   const newSearch = queryParams.get('search') || '';
@@ -128,7 +129,7 @@ const Categories = () => {
 
 
   const handleFilterChange = (search?: string, machineId?: string, page?: string, createdAt?: string) => {
-   
+
     if (search && machineId && page && createdAt) {
       console.log('tesMasuk 1')
       setSearchQuery(search);
@@ -142,7 +143,7 @@ const Categories = () => {
       setSearch(search);
       handleChangeMachineId(machineId);
     }
-     if (machineId || machineId === '') {
+    if (machineId || machineId === '') {
       // ketika masuk machineId
       console.log('tesMasuk 2')
       searchQuery && queryParams.set('search', searchQuery);
@@ -151,7 +152,7 @@ const Categories = () => {
       queryParams.set('pageTesIf2', pagination.page.toString());
       handleChangeMachineId(machineId);
     }
-     if (search || search === '') {
+    if (search || search === '') {
       console.log('tesMasuk 3')
       setSearchQuery(search);
       search && queryParams.set('search', search);
@@ -159,7 +160,7 @@ const Categories = () => {
       queryParams.set('pageTesIf3', pagination.page.toString());
       setSearch(search);
     }
-     if (createdAt) {
+    if (createdAt) {
       console.log(`Ini true lagi ${createdAt}`)
       // ketika masuk date
       console.log('tesMasuk 5')
@@ -170,7 +171,7 @@ const Categories = () => {
       // queryParams.set('pageTesIf10', pagination.page.toString());
       handleCreatedAt(createdAt);
     }
-     if (page) {
+    if (page) {
       // ketika home page
       console.log('tesMasuk 4')
       setPageValue(page);
@@ -188,7 +189,7 @@ const Categories = () => {
       window.history.replaceState(null, '', `?${queryString}`);
     }
   }
-  
+
 
 
   const { Option } = Select;
@@ -210,8 +211,85 @@ const Categories = () => {
     setQuery((oldVal) => ({ ...oldVal, createdAt: createdAt }));
   }
 
+  const GroupingByHours: any = (data: ReleaseProps[]) => {
 
-  console.log(data);
+    const shifts = {
+      shift1: { start: '07:00:00', end: '11:59:00' },
+      shift2: { start: '12:00:00', end: '16:59:00' },
+      shift3: { start: '17:00:00', end: '23:59:00' },
+    };
+
+    const shift1 : any = [];
+    const shift2 : any = [];
+    const shift3 : any = [];
+    let countShift1 : any = [];
+    let countShift2 : any = [];
+    let countShift3 : any = [];
+    let accumulatedByHourShift1;
+    let accumulatedByHourShift2;
+    let accumulatedByHourShift3;
+
+    const hourAccumulator: { [hour: string]: number } = {};
+
+    data.forEach(time => {
+      const momentTime = moment(time.time, 'HH:mm:ss');
+      const hourGroup = momentTime.format('HH:00');
+
+      console.log(moment(time.time))
+
+      if (!hourAccumulator[hourGroup]) {
+        hourAccumulator[hourGroup] = 0;
+      }
+
+      if (momentTime.isAfter(moment(shifts.shift1.start,'HH:mm:ss')) && momentTime.isBefore(moment(shifts.shift1.end,'HH:mm:ss'))) {
+        shift1.push({ hourGroup, amount: time.amount });
+        // countShift1 = time.amount + countShift1;
+        countShift1 = hourAccumulator[hourGroup] += time.amount;
+        accumulatedByHourShift1 = Object.entries(hourAccumulator).map(([time, amount]) => ({ time, amount }));
+      } else if (momentTime.isAfter(moment(shifts.shift2.start,'HH:mm:ss')) && momentTime.isBefore(moment(shifts.shift2.end,'HH:mm:ss'))) {
+        shift2.push({ hourGroup, amount: time.amount });
+        // countShift2 = time.amount + countShift2;
+        countShift2 = hourAccumulator[hourGroup] += time.amount;
+        accumulatedByHourShift2 = Object.entries(hourAccumulator).map(([time, amount]) => ({ time, amount }));
+      } else if (momentTime.isAfter(moment(shifts.shift3.start,'HH:mm:ss')) && momentTime.isBefore(moment(shifts.shift3.end,'HH:mm:ss'))) {
+        shift3.push({ hourGroup, amount: time.amount });
+        // countShift3 = time.amount + countShift3;
+        countShift3 = hourAccumulator[hourGroup] += time.amount;
+        accumulatedByHourShift3 = Object.entries(hourAccumulator).map(([time, amount]) => ({ time, amount }));
+      }
+
+    });
+
+    const groupedByShift = {
+      shift1,
+      shift2,
+      shift3,
+    };
+
+    const countByShift = {
+      countShift1,
+      countShift2,
+      countShift3,
+    };
+
+    const accumulatedByHour = {
+      accumulatedByHourShift1,
+      accumulatedByHourShift2,
+      accumulatedByHourShift3,
+    };
+
+    // const accumulatedByHour = Object.entries(hourAccumulator).map(([hour, amount]) => ({ hour, amount }));
+
+    return {
+      groupedByShift,
+      countByShift,
+      accumulatedByHour,
+    };
+  }
+
+  
+  console.log(data)
+  console.log(GroupingByHours(data));
 
   const columns = [
     {
@@ -220,7 +298,13 @@ const Categories = () => {
       key: 'time',
       align: 'center',
       width: '50%',
-      render: (time: any) => <div>{formatTime(time)}</div>,
+      render: (time: string) => {
+        return (
+          <div className="">
+            {time}
+          </div>
+        );
+      }
     },
     {
       title: 'Amount',
@@ -248,7 +332,7 @@ const Categories = () => {
         rightAction={
           <React.Fragment>
             <Dropdown overlay={
-              <Menu>             
+              <Menu>
                 {
                   data.map((record) => (
                     <Menu.Item key={record.machineId} onClick={() => handleFilterChange(undefined, record.machineId, undefined, undefined)}>
@@ -292,14 +376,14 @@ const Categories = () => {
           <Divider />
 
           <Row gutter={16}>
-            {[1, 2, 3].map((shift) => (
+            {Object.keys(GroupingByHours(data).accumulatedByHour).map((shift, index) => (
               <React.Fragment>
                 <Col span={8} key={shift}>
-                  <Text style={{ fontWeight: "bold", fontSize: 15 }}>Shift {shift}</Text>
+                  <Text style={{ fontWeight: "bold", fontSize: 15 }}>Shift {index + 1}</Text>
                   <Table
                     loading={isLoading}
                     columns={columns}
-                    dataSource={data.filter((record) => record.shift === shift)}
+                    dataSource={GroupingByHours(data).accumulatedByHour[shift]}
                     pagination={{
                       pageSize: pagination.perPage,
                       current: pagination.page,
@@ -313,11 +397,11 @@ const Categories = () => {
                         </Col>
                         <Col span={12} className='text-center'>
                           <Text style={{ fontWeight: "bold", color: "red" }}>
-                            {
+                            {/* {
                               data
                                 .filter((record) => record.shift === shift)
                                 .reduce((acc, cur) => acc + cur.amount, 0) || 0
-                            }
+                            } */}
                           </Text>
                         </Col>
                       </Row>

@@ -1,7 +1,8 @@
 import { BaseResponsePaginationProps } from './config.type';
 
 export interface TargetCurrentProps {
-    targetId?: string;
+    // targetId?: string; 
+    id?: string;
     target: string;
     machineId: string;
     activeTarget: Date | string;

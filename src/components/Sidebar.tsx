@@ -104,7 +104,7 @@ const Sidebar: React.FC = () => {
     },
     {
       key: '/release',
-      label: 'Release',
+      label: 'Output',
       icon: <CheckCircleOutlined />,
     },
     {

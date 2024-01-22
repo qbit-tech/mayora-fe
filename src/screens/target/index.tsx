@@ -156,7 +156,7 @@ const Categories = () => {
                                 <Text type='secondary' style={{ fontSize: 11 }}>Default Target akan berlaku seterusnya sebagai nilai awal apabila tidak ada pergantian nilai target</Text>
                             </Row>
                         </Col>
-                        <Col span={8} className='gutter-row' style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px" }}>
+                        {/* <Col span={8} className='gutter-row' style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px" }}>
                             <Row>
                                 <Col span={12}>
                                     <Text style={{ fontSize: 15 }}>Current Target</Text>
@@ -184,7 +184,8 @@ const Categories = () => {
                             <Row>
                                 <Text type='secondary' style={{ fontSize: 11 }}>Default Target akan berlaku seterusnya sebagai nilai awal apabila tidak ada pergantian nilai target</Text>
                             </Row>
-                        </Col>
+                        </Col> */}
+                        <CurrentTargetData />
                     </Row>
 
                     <Row>

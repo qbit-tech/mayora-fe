@@ -3,7 +3,7 @@ import { BaseResponsePaginationProps } from './config.type';
 export interface ReleaseProps {
     releaseId?: string;
     machineId?: any;
-    time?: Date | string;
+    time?: any;
     amount: number;
     shift?: number;
     createdAt?: Date;
