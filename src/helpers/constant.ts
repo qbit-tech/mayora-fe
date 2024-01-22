@@ -53,6 +53,22 @@ export const formatYearToTime = (date: any) => {
   return '';
 };
 
+export const formatYearToTimeWithSpace = (date: any) => {
+  if (date) {
+    const formattedDate = format(new Date(date), 'dd MMM yyyy');
+    const formattedTime = format(new Date(date), 'HH:mm');
+    
+    // Add extra spaces between date and time
+    const formatted = `
+    ${formattedDate}   
+    ‎ ‎ 
+    ${formattedTime}`;
+    
+    return formatted;
+  }
+  return '';
+};
+
 export const formatUrlParams = (value: string) => {
   const param = value.split(' ').join('-').toLowerCase();
   return param;
