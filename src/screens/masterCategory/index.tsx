@@ -49,7 +49,7 @@ import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
 import { TabsProps } from 'antd/lib';
 import { DataNode } from 'antd/es/tree';
 import Category from '../../components/Category/Category';
-import { CategoryLevel2, ICategoryListItem } from '../../data/model';
+import { ICategoryListItem } from '../../data/model';
 import TabPane from '../../components/Category/TabPane';
 import { ModalAddCategoryView } from '../../components/Category/ModalAdd';
 import axios from 'axios';
@@ -71,9 +71,8 @@ const Categories = () => {
 		data,
     fetchList
 	} = useFetchList<ICategoryListItem>({
-		endpoint: "categoryParent",
+		endpoint: "category-parents",
 	});
-
 
   const addNewCategory = async() =>{
     if (name === "" || name === null || name === undefined) {
@@ -91,7 +90,7 @@ const Categories = () => {
     try {
         setIsLoading(true)
         await axios.post(
-          process.env.REACT_APP_BASE_URL + '/category',
+          process.env.REACT_APP_BASE_URL + '/categories',
           {
             categoryParentId:selectedLv2,
             name,
@@ -108,29 +107,29 @@ const Categories = () => {
     }
   }
 
-  const getTreeData = (parentCategory: CategoryLevel2[]) => {
-    return parentCategory.map((item) => ({
-      title: item.name,
-      key: item.id,
+  const renderChildren = (children: ICategoryListItem[]) : DataNode[] => {
+    return children.map(child => ({
+      title: child.name,
+      key: child.id,
       icon: <FolderOpenOutlined />,
-      children: [
+      children: child.level5.length > 0 || child.categoryLevel === 'level4' ? [
         {
-          title: <Button type="primary" onClick={()=>{setIsModalOpen(true); setSelectedlv2(item.id)}}>Add New Category</Button>, 
-          key: 'BUTTON'
+          title: <Button type="primary" onClick={()=>{setIsModalOpen(true); setSelectedlv2(child.id)}}>Add New Category</Button>, 
+          key: `BUTTON-${child.id}`
         },
-        ...item.level3.map(lv3 =>({
-          title: <Category {...lv3} fetchList={fetchList} parentId={lv3.categoryParentId}/>, 
-          key: lv3.id
+        ...child.level5.map(next =>({
+          title: <Category {...next} fetchList={fetchList} parentId={next.categoryParentId}/>, 
+          key: next.id
         }))
-      ]
-    }));
+      ] : (child.children && child.children.length > 0) ? renderChildren(child.children) : []
+    }))
   }
 
 
   const tabItems: TabsProps['items'] =  data.map((item) => ({
     key: item.id,
     label: item.name,
-    children: <TabPane treeData={getTreeData(item.level2)}/>,
+    children: <TabPane treeData={renderChildren(item.children)}/>,
   }));
   
   return (

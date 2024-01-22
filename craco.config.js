@@ -1,6 +1,9 @@
 const CracoLessPlugin = require('craco-less');
 
 module.exports = {
+  devServer: {
+    port: 5000
+  },
   plugins: [
     {
       plugin: CracoLessPlugin,

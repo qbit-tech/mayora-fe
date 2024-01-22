@@ -41,6 +41,8 @@ const RoleEdit = React.lazy(() => import('../screens/role/Edit'));
 const RoleDetail = React.lazy(() => import('../screens/role/Detail'));
 
 const TroubleList = React.lazy(() => import('../screens/troubleList'));
+const TroubleListEdit = React.lazy(() => import('../screens/troubleList/Edit'));
+const TroubleListSelect = React.lazy(() => import('../screens/troubleList/Select'));
 
 const ManualCollection = React.lazy(() => import('../screens/manualCollection'));
 const ManualCollectionDetail = React.lazy(() => import('../screens/manualCollection/Detail'));
@@ -284,6 +286,22 @@ const RootNavigator: React.FC = () => {
             }
           />
           <Route
+            path="/trouble-list/edit/:id/:idCategory"
+            element={
+              <PrivateRoute loginPath="/login">
+                <TroubleListEdit />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/trouble-list/edit/:id/:idCategory/select"
+            element={
+              <PrivateRoute loginPath="/login">
+                <TroubleListSelect />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/manual-collection"
             element={
               <PrivateRoute loginPath="/login">
@@ -291,14 +309,22 @@ const RootNavigator: React.FC = () => {
               </PrivateRoute>
             }
           />
-           {/* <Route
-            path="/manual-collection/edit/:id"
+           <Route
+            path="/manual-collection/edit/:idCategory/:shift"
             element={
               <PrivateRoute loginPath="/login">
                 <ManualCollectionEdit />
               </PrivateRoute>
             }
-          /> */}
+          />
+          <Route
+            path="/manual-collection/detail/:idCategory"
+            element={
+              <PrivateRoute loginPath="/login">
+                <ManualCollectionDetail />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/release"
             element={

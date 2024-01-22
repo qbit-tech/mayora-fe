@@ -7,79 +7,126 @@ import styled from 'styled-components';
 import { CategoryList } from '../../data/model';
 import { IManualollectionListItem } from '../../data/model/manual-collection';
 import { ModalEdit } from './ModalEdit';
+import { useNavigate } from "react-router-dom";
+
+type TableManualType = {
+  id: String;
+  name: String;
+  value1: IManualollectionListItem | undefined;
+  value2: IManualollectionListItem | undefined;
+  value3: IManualollectionListItem | undefined;
+  total: Number;
+  unit: String;
+}
+
+type SingleManual = {
+  value : Number;
+  id : String | undefined;
+}
 
 interface ManualTableProps{
-  data:IManualollectionListItem[],
+  data:CategoryList[],
   fetchList: () => Promise<void>;
 }
 function ManualTable(props: ManualTableProps) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [selectedManual, setSelectedManual] = useState<IManualollectionListItem>(props.data[0])
-  const [selectedValue, setSelectedValue] = useState<string>('')
+  // const [selectedManual, setSelectedManual] = useState<CategoryList>(props.data[0])
+  // const [selectedValue, setSelectedValue] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const navigate = useNavigate();
 
-  const editManual = async() =>{
-    if (selectedValue === "" || selectedValue === null || selectedValue === undefined) {
-        return message.error("Value Name is required");
-    }
+  const convertedData = () : TableManualType[] => {
+    return [
+      ...props.data.map(item=>{
+        const shift1 = item.manualCollection.find(manual => manual.shift === 'shift1')
+        const shift2 = item.manualCollection.find(manual => manual.shift === 'shift2')
+        const shift3 = item.manualCollection.find(manual => manual.shift === 'shift3')
 
-    try {
-        setIsLoading(true)
-        await axios.patch(
-          process.env.REACT_APP_BASE_URL + '/manual-collection/' + selectedManual.id,
-          {
-            ...selectedManual,
-            value:selectedValue
+        return {
+            id: item.id,
+            name: item.name,
+            value1: shift1,
+            value2: shift2,
+            value3: shift3,
+            total: Number(shift1 ? shift1.value : 0) + Number(shift2 ? shift2.value : 0) + Number(shift3 ? shift3.value : 0),
+            unit: item.unit
           }
-        );
-        message.success("Successfully edit value manual collection");
-        setIsLoading(false)
-        await props.fetchList()
-    } catch (error) {
-        setIsLoading(false)
-        return message.error("Error edit value manual collection");
-    }
+      })
+    ]
   }
 
   const columns = [
     {
-        title: 'Name',
-        dataIndex: 'id',
-        width: 200,
-        key: 'id',
-        render: (text: string, manual: IManualollectionListItem) => {
+        title: 'Category',
+        dataIndex: 'name',
+        key: 'name',
+        render: (text: string, category: TableManualType) => {
             return (
                 <div className="">
-                    {manual.id ? manual.id : '-'}
+                    {category.name ? category.name : '-'}
                 </div>
             );
         }
     },
     {
-        title: 'Value',
-        dataIndex: 'value',
-        key: 'target',
-        render: (text: string, manual: IManualollectionListItem) => {
+        title: 'Value (Shift 1)',
+        dataIndex: 'value1',
+        key: 'value1',
+        render: (text: string, category: TableManualType) => {
             return (
                 <div className="">
-                    {manual.value ? manual.value : '-'}
-                    <EditOutlined onClick={()=>{
-                      setSelectedManual(manual); 
-                      setSelectedValue(manual.value)
-                      setIsModalOpen(true);
-                    }} style={{marginLeft:'5px'}}/>
+                    {category.value1 ? `${category.value1.value} ${category.unit}` : '-'}
+                    <EditOutlined 
+                      style={{ color: 'blue' }} 
+                      onClick={()=>
+                        navigate(`/manual-collection/edit/${category.id}/shift1`)
+                      }/>
                 </div>
             );
         }
     },
+    {
+      title: 'Value (Shift 2)',
+      dataIndex: 'value2',
+      key: 'value2',
+      render: (text: string, category: TableManualType) => {
+          return (
+              <div className="">
+                  {category.value2 ? `${category.value2.value} ${category.unit}` : '-'}
+                  <EditOutlined 
+                      style={{ color: 'blue' }} 
+                      onClick={()=>
+                        navigate(`/manual-collection/edit/${category.id}/shift2`)
+                  }/>
+              </div>
+          );
+      }
+  },
+  {
+    title: 'Value (Shift 3)',
+    dataIndex: 'value3',
+    key: 'value3',
+    render: (text: string, category: TableManualType) => {
+        return (
+            <div className="">
+              {category.value3 ? `${category.value3.value} ${category.unit}` : '-'} 
+              <EditOutlined 
+              style={{ color: 'blue' }} 
+              onClick={()=>
+                navigate(`/manual-collection/edit/${category.id}/shift3`)
+              }/>
+            </div>
+        );
+    }
+},
     {
         title: 'Total',
-        dataIndex: 'value',
+        dataIndex: 'total',
         key: 'total',
-        render: (text: string, manual: IManualollectionListItem) => {
+        render: (text: string, category: TableManualType) => {
             return (
                 <div className="">
-                    {manual.value ? manual.value : '-'}
+                    {category.total ? category.total.toString() + " " + category.unit : '-'}
                 </div>
             );
         }
@@ -88,9 +135,9 @@ function ManualTable(props: ManualTableProps) {
         title: 'Detail',
         dataIndex: 'detail',
         key: 'detail',
-        render: (text: string, manual: IManualollectionListItem) => {
+        render: (text: string, category: TableManualType) => {
             return (
-              <Button type="link" onClick={()=>{console.log('button')}}>Detail</Button>
+              <Button type="link" onClick={()=>navigate('detail/'+category.id)}>Detail</Button>
             );
         }
     },
@@ -98,23 +145,9 @@ function ManualTable(props: ManualTableProps) {
 
   return (
     <ContainerStyle>
-      <ModalEdit
-          setValue={setSelectedValue}
-          value={selectedValue}
-          isModal={true}
-          isModalOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            editManual()
-          } }
-          onSuccess={() => {
-            setIsModalOpen(false);
-          } }
-          onModalCancel={() => setIsModalOpen(false)}
-        />
         <Table
             columns={columns}
-            dataSource={props.data}
+            dataSource={convertedData()}
             pagination={false}
             style={{ marginTop: 10, width: '100%' }}
         />

@@ -1,281 +1,210 @@
 import {
+  CloseOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
+import {
+  Form,
+  FormInstance,
+  Input,
+  Typography,
+  message,
+  Modal,
+  Radio,
+  Select,
+  Space,
+  Upload,
+  Image,
+  Button,
+  Card,
+  Spin,
   Row,
   Col,
-  Card,
-  Typography,
-  Image,
+  InputNumber,
   Divider,
-  Table,
   Switch,
-  Button,
+  Table,
   TableProps,
-  Modal,
-  message,
-  Space,
-  Form,
-  Input,
-  Radio,
-  Spin,
-  Tag,
 } from 'antd';
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
-import { BaseResponseProps } from '../../types/config.type';
-import {
-  CategoryProps,
-  initialProductCategories,
-} from '../../types/category.type';
-import { formatYearToTime } from '../../helpers/constant';
-import { replaceDashWithSpace } from '../../helpers/replaceDashWithSpace';
-import { capitalizeFirstLetter } from '../../helpers/text';
-import useDetailBreadcrumbs from '../../hooks/useDetailBreadcrumbs';
 import styled from 'styled-components';
-import { DeleteOutlined } from '@ant-design/icons';
-import NotSet from '../../components/NotSet';
-
-interface ResponseProps extends BaseResponseProps<CategoryProps> {
-  payload: Omit<CategoryProps, 'createdAt' | 'updatedAt'>;
-}
+import 'react-quill/dist/quill.snow.css';
+import { CategoryList } from '../../data/model';
+import { IManualollectionListItem } from '../../data/model/manual-collection';
+import moment from 'moment';
 
 interface ILocation {
-  categoryId: string;
+  idCategory: string;
 }
 
 const { Title, Text } = Typography;
 
-const CategoryDetail: React.FC = () => {
-  const [form] = Form.useForm();
-  const { categoryId } = useParams<keyof ILocation>() as ILocation;
+const CategoryEdit: React.FC = () => {
   const navigate = useNavigate();
-  const { setBreadcrumbDetails } = useDetailBreadcrumbs();
-
+  const location = useLocation();
+  const { idCategory } = useParams<keyof ILocation>() as ILocation;
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [isLoadingAction, setIsLoadingAction] = React.useState<boolean>(false);
-  const [category, setCategory] = React.useState<CategoryProps>(
-    initialProductCategories
-  );
-  const [categories, setCategories] = React.useState<
-    Array<Omit<CategoryProps, 'subCategories'>>
-  >([]);
+  const [category, setCategory] = React.useState<CategoryList>();
 
-  const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] =
-    React.useState<boolean>(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] =
-    React.useState<boolean>(false);
-  const [isAddSubCategoryModal, setIsAddSubCategoryModal] =
-    React.useState<boolean>(false);
-  const [tmpSubCategory, setTmpSubCategory] = React.useState<CategoryProps>(
-    initialProductCategories
-  );
-  const [IsSubCatModalOpen, setIsSubCatModalOpen] =
-    React.useState<boolean>(false);
+  const fetchDetail = async () => {
+    try {
+      setIsLoading(true);
+      console.log("bgyu",idCategory)
+
+      const res = await httpRequest.get(
+        '/categories/' + idCategory 
+      );
+      const data: CategoryList = res.data.payload
+      setCategory(data)
+        console.log("dtatat",data)
+
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+    }
+  };
 
   React.useEffect(() => {
-    const fetchCategoryDetail = async () => {
-      try {
-        setIsLoading(true);
-
-        const res = await httpRequest.get<ResponseProps>(
-          '/product/categories/' + categoryId
-        );
-        const getPointAmount = await httpRequest.get<any>(
-          '/app-configs/' + `POINT_${categoryId}`
-        );
-
-        const split = getPointAmount?.data?.payload?.value?.includes('/')
-          ? getPointAmount?.data?.payload?.value?.split('/')
-          : [];
-
-        setCategory({
-          ...res.data.payload,
-        });
-
-        setCategories(res.data.payload.subCategories);
-
-        const bcDetails = [
-          {
-            field: 'categoryId',
-            value: categoryId,
-            label: 'Detail Category',
-          },
-        ];
-        setBreadcrumbDetails(bcDetails);
-
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCategoryDetail();
-  }, [categoryId, isLoadingAction]);
-
-
-  const handleEditCategory = () => {
-    navigate('/categories/' + categoryId + '/edit');
-  };
+    if (idCategory) {
+      fetchDetail()
+    }
+  }, [location]);
 
   const columns = [
     {
-      title: 'NAME',
-      dataIndex: 'categoryName',
-      key: 'categoryName',
-      align: 'left',
-      width: 400,
-      render: (text: string, record: CategoryProps) => record?.categoryName,
+        title: 'Category',
+        dataIndex: 'name',
+        key: 'name',
+        render: (text: string, manual: IManualollectionListItem) => {
+            return (
+                <div className="">
+                    {moment(manual.updatedAt).format('DD MMM YYYY HH:mm')}
+                </div>
+            );
+        }
     },
     {
-      title: 'STATUS',
-      key: 'isPublished',
-      dataIndex: 'isPublished',
-      align: 'left',
-      render: (isPublished: any, record: CategoryProps) => (
-        <>
-          {
-            <Switch
-              checked={isPublished === true}
-              disabled={true}
-            />
-          }
-        </>
-      ),
+        title: 'Shift',
+        dataIndex: 'shift',
+        key: 'shift',
+        render: (text: string, manual: IManualollectionListItem) => {
+            return (
+                <div className="">
+                   {manual.shift}
+                </div>
+            );
+        }
     },
     {
-      title: 'CREATED AT',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      align: 'left',
-      render: (createdAt: any) => <div>{formatYearToTime(createdAt)}</div>,
+      title: 'Value',
+      dataIndex: 'value',
+      key: 'value',
+      render: (text: string, manual: IManualollectionListItem) => {
+          return (
+              <div className="">
+                 {manual.value}
+              </div>
+          );
+      }
     },
-  ] as TableProps<any>['columns'];
+    {
+      title: 'Remark',
+      dataIndex: 'remark',
+      key: 'remark',
+      render: (text: string, manual: IManualollectionListItem) => {
+          return (
+              <div className="">
+                 {manual.remark}
+              </div>
+          );
+      }
+    },
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string, manual: IManualollectionListItem) => {
+          return (
+              <div className="">
+                 Agus
+              </div>
+          );
+      }
+    },
+    {
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      render: (text: string, manual: IManualollectionListItem) => {
+          return (
+              <div className="">
+                 Agus
+              </div>
+          );
+      }
+    },
+];
 
   return (
     <React.Fragment>
       <HeaderSection
         icon="back"
-        title={capitalizeFirstLetter(category?.categoryName)}
-        rightAction={
-          <Space>
-            <Button
-              style={{ padding: '0px 32px' }}
-              type="primary"
-              onClick={handleEditCategory}
-            >
-              Edit
-            </Button>
-          </Space>
-        }
+        title={'Detail '+ category?.name}
+        // subtitle="Manage your menu data"
       />
-      {isLoading ? (
-        <Spin spinning />
-      ) : (
-        <>
-          <Spin spinning={isLoading}>
-            <Spin spinning={isLoading}>
-              <Card bordered={false}>
-                <Form
-                  form={form}
-                  name="productForm"
-                  layout="vertical"
-                  autoComplete="off"
-                >
-                  <Row>
-                    <Col span={5}>
-                      <Title level={5}>Category</Title>
-                    </Col>
-                    <Col offset={1} span={16}>
-                      <Row style={{ marginBottom: '0.7rem' }}>
-                        <Col span={24}>
-                          <Title
-                            level={5}
-                            style={{
-                              marginBottom: 2,
-                              fontSize: 14,
-                            }}
-                          >
-                            Category Name
-                          </Title>
-                          <Text>
-                            {category?.categoryName}
-                          </Text>
-                        </Col>
-                      </Row>
-                      <Row style={{ marginBottom: '0.7rem' }}>
-                        <Col span={24}>
-                          <Title
-                            level={5}
-                            style={{
-                              marginBottom: 5,
-                              fontSize: 14,
-                            }}
-                          >
-                            Description
-                          </Title>
-                          <Text>
-                            {
-                              category?.description ? category?.description : <NotSet value='No Description' />
-                            }
-                          </Text>
-                        </Col>
-                      </Row>
-                      <Row style={{ marginBottom: '0.7rem' }}>
-                        <Col span={24}>
-                          <Title
-                            level={5}
-                            style={{
-                              color: '#768499',
-                              marginBottom: 2,
-                              fontSize: 14,
-                            }}
-                          >
-                            Status
-                          </Title>
-                          {
-                            <Tag
-                              style={{
-                                border: `2px solid ${category?.isPublished ? '#31d63a' : '#D81F64'}`,
-                                color: `${category?.isPublished ? '#31d63a' : '#D81F64'}`,
-                              }}
-                            >
-                              {category?.isPublished ? 'Active' : 'Inactive'}
-                            </Tag>
-                          }
-                        </Col>
-                      </Row>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={22}>
-                      <Divider />
-                    </Col>
-                  </Row>
-                </Form>
-                <Row>
-                  <Col span={5}>
-                    <Title level={5}>Sub Category</Title>
-                  </Col>
-                  <Col offset={1} span={16}>
-                    <Row style={{ marginBottom: '0.7rem' }}>
-                      <Col span={24}>
-                        <Table
-                          loading={isLoading}
-                          columns={columns}
-                          pagination={false}
-                          dataSource={categories && categories}
-                        />
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
-              </Card>
-            </Spin>
-          </Spin>
-        </>
-      )}
+
+      <Spin spinning={isLoading}>
+        <Table
+          columns={columns}
+          dataSource={category?.manualCollection}
+          pagination={false}
+          style={{ marginTop: 10, width: '100%' }}
+        />
+      </Spin>
     </React.Fragment>
   );
 };
 
-export default CategoryDetail;
+export default CategoryEdit;
+
+const CustomRadio = styled(Radio)`
+  margin-right: 5rem;
+  .ant-radio-checked .ant-radio-inner {
+    border-color: #1e1e1e;
+    border-width: 2px;
+    box-shadow: none;
+  }
+  .ant-radio:hover .ant-radio-inner {
+    background-color: white;
+  }
+  .ant-radio-checked .ant-radio-inner:after {
+    background-color: #1e1e1e;
+  }
+`;
+
+const CustomUpload = styled(Upload)`
+  .ant-upload {
+    text-align: left;
+    display: none;
+  }
+
+  .ant-upload-list-picture-card .ant-upload-list-item {
+    padding: 0;
+    border: none;
+  }
+
+  .ant-upload-list-picture-card-container {
+    width: 144px !important;
+    height: 104px;
+    margin-right: 0;
+  }
+
+  .ant-upload-list-picture-card .ant-upload-list-item-thumbnail,
+  .ant-upload-list-picture-card .ant-upload-list-item-thumbnail img {
+    object-fit: cover !important;
+  }
+`;

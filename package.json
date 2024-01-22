@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "craco start --verbose",
-    "start:dev": "env-cmd -f .env.development craco start",
+    "start:dev": "env-cmd -f .env craco start",
     "start:dev-windows": "PORT=3000 craco start",
     "build:development": "env-cmd -f .env.development craco build",
     "start:staging": "PORT=3000 env-cmd -f .env.staging craco start",

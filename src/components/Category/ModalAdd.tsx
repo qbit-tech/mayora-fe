@@ -24,15 +24,6 @@ interface ModalAddCompanyProps {
 export const ModalAddCategoryView: React.FC<ModalAddCompanyProps> = (props) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const Title = () =>{
-        return(
-            <div>
-                <span>Add New Category</span>
-                <CloseOutlined />
-            </div>
-        )
-    }
-
   return (
     <Modal
       title="Add New Category"
@@ -55,10 +46,9 @@ export const ModalAddCategoryView: React.FC<ModalAddCompanyProps> = (props) => {
 
         <div style={{display:'flex', justifyContent:'space-between', width:'100%'}}>
             <InputWithLabel label="Unit/Satuan" style={{ flex: "45%", marginRight:'5px' }}>
-                <Select
-                    defaultValue="unit1"
-                    options={[{ value: 'unit1', label: 'unit1' }, { value: 'unit2', label: 'unit2' }]}
-                    onChange={(value)=>props.setUnit(value)}
+                <Input
+                    defaultValue="kg"
+                    onChange={(e)=>props.setUnit(e.target.value)}
                     value={props.unit}
                 />
             </InputWithLabel>
