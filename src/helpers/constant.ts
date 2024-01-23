@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 
 // export const PAGE_SIZE_OPTIONS = ['25', '50', '100'];
 // export const PAGE_SIZE_OPTIONS = ['3', '5', '10'];
-export const PAGE_SIZE_OPTIONS = ['10', '20', '50'];
+export const PAGE_SIZE_OPTIONS = ['5','10', '20', '50'];
 
 const date = new Date();
 

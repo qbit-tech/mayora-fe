@@ -1,7 +1,8 @@
 import { BaseResponsePaginationProps } from './config.type';
 
 export interface TargetOEEProps {
-    targetId?: string;
+    // targetId?: string;
+    id?: string;
     target: string;
     machineId: string;
     name: string;

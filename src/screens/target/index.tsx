@@ -57,8 +57,9 @@ import InputOeeTarget from './modal/InputOeeTarget';
 import DefaultTargetData from './targetData/defaultTargetData';
 import CurrentTargetData from './targetData/currentTargetData';
 import OEETargetData from './targetData/oeeTargetData';
-import ProductionTargetLog from './targetTable/productionTargetLog';
-import OEETargetLog from './targetTable/oeeTargetLog';
+import ProductionTargetLog from './targetData/targetTable/productionTargetLog';
+import OEETargetLog from './targetData/targetTable/oeeTargetLog';
+import { set } from 'date-fns';
 
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
@@ -74,6 +75,7 @@ const Categories = () => {
     const [isDefautModalVisible, setIsDefaultModalVisible] = useState(false);
     const [isCurrentModalVisible, setIsCurrentModalVisible] = useState(false);
     const [isOeeModalVisible, setIsOeeModalVisible] = useState(false);
+    const [onSuccess, setOnSuccess] = React.useState<boolean>(false);
 
     const onSelect = (selectedKeys: React.Key[], info: any) => {
         console.log('selected', selectedKeys, info);
@@ -86,7 +88,7 @@ const Categories = () => {
     const [tempRelease, setTempRelease] = React.useState<TargetProps>(
         initialTarget
     );
-    
+
     // const {
     //     isLoading,
     //     setIsLoading,
@@ -127,6 +129,13 @@ const Categories = () => {
         setIsOeeModalVisible(false);
     }
 
+    const handleOnSuccessChange = (value: boolean) => {
+        setOnSuccess(value); // Update the parent state when the child state changes
+    };
+
+    React.useEffect(() => {
+        console.log('parent',onSuccess);
+    }, [onSuccess]);
 
     const TabPane1 = () => {
         return (
@@ -134,68 +143,18 @@ const Categories = () => {
                 <React.Fragment>
 
                     <Row gutter={20}>
-                        <Col span={8} className='gutter-row' style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px", marginRight: 20 }}>
-                            <Row>
-                                <Text style={{ fontSize: 15 }}>Default Target</Text>
-                            </Row>
-                            <Row style={{ borderBottom: "2px solid rgba(5, 5, 5, 0.16)", marginBottom: 5 }}>
-                                <Col>
-                                    <Text style={{ fontSize: 40, fontWeight: "bold" }}>
-                                        {
-                                            DefaultTargetData()
-                                        }
-                                    </Text>
-                                </Col>
-                                <Col offset={1}>
-                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }} onClick={handleEditClickDefault}>
-                                        Edit
-                                    </Link>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Text type='secondary' style={{ fontSize: 11 }}>Default Target akan berlaku seterusnya sebagai nilai awal apabila tidak ada pergantian nilai target</Text>
-                            </Row>
-                        </Col>
-                        {/* <Col span={8} className='gutter-row' style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px" }}>
-                            <Row>
-                                <Col span={12}>
-                                    <Text style={{ fontSize: 15 }}>Current Target</Text>
-                                </Col>
-                                <Col span={12} className='text-right'>
-                                    <Text type='danger' style={{ fontSize: 15, fontWeight: "bold" }}>
-                                        {new Date().getDate() + " " + new Date().toLocaleString('default', { month: 'short' }) + " " + new Date().getFullYear()}
-                                    </Text>
-                                </Col>
-                            </Row>
-                            <Row style={{ borderBottom: "2px solid rgba(5, 5, 5, 0.16)", marginBottom: 5 }}>
-                                <Col>
-                                    <Text style={{ fontSize: 40, fontWeight: "bold" }}>
-                                        {
-                                            CurrentTargetData()
-                                        }
-                                    </Text>
-                                </Col>
-                                <Col offset={1}>
-                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }} onClick={handleEditClickCurrent}>
-                                        Edit
-                                    </Link>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Text type='secondary' style={{ fontSize: 11 }}>Default Target akan berlaku seterusnya sebagai nilai awal apabila tidak ada pergantian nilai target</Text>
-                            </Row>
-                        </Col> */}
-                        <CurrentTargetData />
+                        <DefaultTargetData />
+                        <CurrentTargetData onSuccessCallback={handleOnSuccessChange}/>
                     </Row>
 
+
+
                     <Row>
+
                         <Text style={{ fontWeight: "bold", marginTop: 20 }}>Production Target Log</Text>
-                    </Row>
-
-                    <Row>
-                        {
-                            ProductionTargetLog()
-                        }
+                        
+                        <ProductionTargetLog onSuccess={onSuccess} setOnSuccess={setOnSuccess} display={true} />
+                    
                     </Row>
 
 
@@ -208,33 +167,21 @@ const Categories = () => {
         return (
             <div style={{ height: 'auto', width: '100%', backgroundColor: 'white', padding: "20px" }}>
                 <React.Fragment>
+
                     <Row gutter={20}>
-                        <Col span={8} className='gutter-row' style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px", marginRight: 20 }}>
-                            <Row>
-                                <Text style={{ fontSize: 15 }}>OEE Target</Text>
-                            </Row>
-                            <Row style={{ marginBottom: 5 }}>
-                                <Col>
-                                    <Text style={{ fontSize: 40, fontWeight: "bold" }}>
-                                        {OEETargetData()}%
-                                    </Text>
-                                </Col>
-                                <Col offset={1}>
-                                    <Link style={{ fontSize: 20, textDecoration: "underline", top: 20, position: "relative" }} onClick={handleEditClickOee}>
-                                        Edit
-                                    </Link>
-                                </Col>
-                            </Row>
-                        </Col>
+                        
+                        <OEETargetData onSuccessCallback={handleOnSuccessChange} />
+
                     </Row>
+
                     <Row>
                         <Text style={{ fontWeight: "bold", marginTop: 20 }}>OEE Target Log</Text>
                     </Row>
+
                     <Row>
-                        {
-                            OEETargetLog()
-                        }
+                        <OEETargetLog onSuccess={onSuccess} setOnSuccess={setOnSuccess} display={true} />
                     </Row>
+                    
                 </React.Fragment>
             </div>
         )

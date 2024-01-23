@@ -411,12 +411,12 @@ const Categories = () => {
               </React.Fragment>
             ))}
 
-            <CustomPagination
+            {/* <CustomPagination
               data={data && data}
               pagination={pagination}
               changeLimit={changeLimit}
               changePage={changePage}
-            />
+            /> */}
           </Row>
 
         </React.Fragment>

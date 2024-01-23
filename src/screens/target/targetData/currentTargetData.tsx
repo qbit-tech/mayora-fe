@@ -10,27 +10,29 @@ import {
     TimePicker,
 } from 'antd';
 import { formatDate, PAGE_SIZE_OPTIONS } from '../../../helpers/constant';
-import { initialTargetDefault, TargetDefaultProps } from '../../../types/targetDefault.type';
 import useCustomDataFetcher from '../../../hooks/useCustomDataFetcher';
 import { TargetCurrentProps, initialTargetCurrent } from '../../../types/targetCurrent.type';
 import { httpRequest } from '../../../helpers/api';
 import dayjs from 'dayjs';
+import ProductionTargetLog from './targetTable/productionTargetLog';
+import axios from 'axios';
 
 const { Text, Link } = Typography;
 
-const CurrentTargetData = () => {
+
+type axiosPutResponse = {
+    code: any;
+    message: any;
+    payload: {
+        isSuccess: any;
+        id: any;
+    }
+}
+
+const CurrentTargetData = ({ onSuccessCallback }: { onSuccessCallback: (value: boolean) => void }) => {
 
     const {
-        isLoading,
-        setIsLoading,
         data,
-        pagination,
-        // setData,
-        setSearch,
-        fetchList,
-        setQuery,
-        changePage,
-        changeLimit,
     } = useCustomDataFetcher<TargetCurrentProps>({
         endpoint: 'productionTargets',
         limit: +PAGE_SIZE_OPTIONS[0],
@@ -41,6 +43,9 @@ const CurrentTargetData = () => {
     const [form] = Form.useForm();
     // const [faqs, setFaqs] = React.useState<FAQSProps>(initialFaqs);
     const [field, setField] = React.useState<TargetCurrentProps>(initialTargetCurrent);
+    const [dataTarget, setDataTarget] = React.useState<TargetCurrentProps[]>([]);
+    const [onSuccess, setOnSuccess] = React.useState<boolean>(false);
+    const [onSuccessChild, setOnSuccessChild] = React.useState<boolean>(false);
 
     const openInputCurrentTargetModal = () => {
         setVisibleInputCurrentTarget(true);
@@ -68,7 +73,6 @@ const CurrentTargetData = () => {
 
             message.success('Success create new target');
 
-            fetchList();
 
         }
         catch (err) {
@@ -77,7 +81,7 @@ const CurrentTargetData = () => {
         finally {
             setIsLoadingAction(false);
             // visibleInputDefaultTarget = false;
-            fetchList();
+            setOnSuccess(true);
             onCancelInputCurrentTarget();
         }
     };
@@ -96,11 +100,23 @@ const CurrentTargetData = () => {
 
             console.log(props);
 
-            await httpRequest.put('/productionTargets/' + data[0].id, dataToSent)
+            // await httpRequest.put('/productionTargets/' + data[0].id, dataToSent)
 
-            message.success('Success edit target');
+            // message.success('Success edit target');
+            
 
-            fetchList();
+            // data[0].target = field.target;
+
+            const response = await axios.put<axiosPutResponse>('/productionTargets/' + data[0].id, dataToSent);
+            if (response.data.code === 'success' && response.data.payload.isSuccess) {    
+                data[0].id = response.data.payload.id;
+                data[0].target = field.target;
+                message.success('Success edit target');
+                console.log(data);
+                setOnSuccess(true);
+            } else {
+                message.error(response.data.message || 'Failed to edit target');
+            }
 
         }
         catch (err : any) {
@@ -109,12 +125,20 @@ const CurrentTargetData = () => {
         finally {
             setIsLoadingAction(false);
             // visibleInputDefaultTarget = false;
-            fetchList();
+            // fetchList();
+            // setOnSuccess(false);
             onCancelInputCurrentTarget();
         }
     }
 
-    console.log(data);
+    // console.log(data);
+
+    React.useEffect(() => {
+        if (onSuccess == true) {
+            setOnSuccessChild(true);
+            onSuccessCallback(true);
+        }
+    }, [onSuccess, setOnSuccessChild, onSuccessCallback]);
 
 
 
@@ -135,13 +159,13 @@ const CurrentTargetData = () => {
                     onFinish={data.length === 0 ? createTarget : editTarget}
                     autoComplete="off"
                 >
-                    <Text>Target</Text>
+                    {/* <Text>Target</Text> */}
                     <Form.Item
                         name="target"
                         label="Target"
                         rules={[{ required: true, message: 'Please input target' }]}
                     >
-                        <Input
+                        <Input                        
                             placeholder="Current Target"
                             value={field.target}
                             onChange={(e) =>
@@ -157,9 +181,8 @@ const CurrentTargetData = () => {
                         />
                     </Form.Item>
 
-                    <br />
 
-                    <Text>Active Target</Text>
+                    {/* <Text>Active Target</Text> */}
                     <Form.Item
                         name="activeTarget"
                         label="Active Target"
@@ -174,12 +197,13 @@ const CurrentTargetData = () => {
                                     activeTarget: value?.format('HH:mm:ss') || '',
                                 })
                             }
+                            style={{ width: '100%' }}
                         />
                     </Form.Item>
                 </Form>
 
             </Modal>
-
+                            
             <Col span={8} className='gutter-row' style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px" }}>
                 <Row>
                     <Col span={12}>
@@ -195,7 +219,7 @@ const CurrentTargetData = () => {
                     <Col>
                         <Text style={{ fontSize: 40, fontWeight: "bold" }}>
                             {
-                                data.length === 0 ? 'NaN' : data[0].target
+                                data[0]?.target ? data[0]?.target : '-'
                             }
                         </Text>
                     </Col>
@@ -211,7 +235,8 @@ const CurrentTargetData = () => {
                     <Text type='secondary' style={{ fontSize: 11 }}>Default Target akan berlaku seterusnya sebagai nilai awal apabila tidak ada pergantian nilai target</Text>
                 </Row>
             </Col>
-
+            
+            <ProductionTargetLog onSuccess={onSuccess} setOnSuccess={setOnSuccess} display={false}/>
 
         </React.Fragment>
     );
