@@ -138,7 +138,9 @@ const Categories = () => {
       key: child.id,
       icon: <FolderOpenOutlined />,
       children: child.level5.length > 0 || child.categoryLevel === 'level4' ? [
-        ...child.level5.map(next =>({
+        ...child.level5
+        .filter(item=>item.categoryType === 'trouble')
+        .map(next =>({
           title: <SelectCategory {...next}/>, 
           key: next.id
         }))
@@ -150,7 +152,7 @@ const Categories = () => {
   const tabItems: TabsProps['items'] =  data.map((item) => ({
     key: item.id,
     label: item.name,
-    children: <TabPane treeData={renderChildren(item.children)}/>,
+    children: <TabPane treeData={renderChildren((item.children))}/>,
   }));
   
   return (

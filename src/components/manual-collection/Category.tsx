@@ -29,15 +29,13 @@ interface ManualTableProps{
   fetchList: () => Promise<void>;
 }
 function ManualTable(props: ManualTableProps) {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  // const [selectedManual, setSelectedManual] = useState<CategoryList>(props.data[0])
-  // const [selectedValue, setSelectedValue] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const navigate = useNavigate();
 
   const convertedData = () : TableManualType[] => {
     return [
-      ...props.data.map(item=>{
+      ...props.data
+      .filter(item=> item.categoryType === 'manualcollection')
+      .map(item=>{
         const shift1 = item.manualCollection.find(manual => manual.shift === 'shift1')
         const shift2 = item.manualCollection.find(manual => manual.shift === 'shift2')
         const shift3 = item.manualCollection.find(manual => manual.shift === 'shift3')
@@ -79,7 +77,7 @@ function ManualTable(props: ManualTableProps) {
                     <EditOutlined 
                       style={{ color: 'blue' }} 
                       onClick={()=>
-                        navigate(`/manual-collection/edit/${category.id}/shift1`)
+                        navigate(`edit/${category.id}/shift1`)
                       }/>
                 </div>
             );
@@ -96,7 +94,7 @@ function ManualTable(props: ManualTableProps) {
                   <EditOutlined 
                       style={{ color: 'blue' }} 
                       onClick={()=>
-                        navigate(`/manual-collection/edit/${category.id}/shift2`)
+                        navigate(`edit/${category.id}/shift2`)
                   }/>
               </div>
           );
@@ -113,7 +111,7 @@ function ManualTable(props: ManualTableProps) {
               <EditOutlined 
               style={{ color: 'blue' }} 
               onClick={()=>
-                navigate(`/manual-collection/edit/${category.id}/shift3`)
+                navigate(`edit/${category.id}/shift3`)
               }/>
             </div>
         );

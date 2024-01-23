@@ -252,11 +252,11 @@ const CategoryEdit: React.FC = () => {
                     type='number'
                 />
             </InputWithLabel>
-            <InputWithLabel label="Value">
+            <InputWithLabel label="Remark">
                 <TextArea
                     style={{ marginBottom: 10 }}
                     onChange={(e)=>setRemark(e.target.value)}
-                    placeholder="Value"
+                    placeholder="Remark"
                     value={remark}
                 />
             </InputWithLabel>

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AppLayout from '../layout/AppLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MoreOutlined, SearchOutlined } from '@ant-design/icons';
+import { DownOutlined, MoreOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import {
   Pagination,
   Space,
@@ -19,7 +19,9 @@ import {
   Button,
   Col,
   Row,
+  DatePicker,
 } from 'antd';
+import type { MenuProps } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
 import {
@@ -45,23 +47,30 @@ import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
 import { ITroubleListItem } from '../../data/model/trouble';
 import moment from 'moment';
+import useAuthUser from 'react-auth-kit/dist/hooks/useAuthUser';
+import { DetailUserWithMachine } from '../../data/model/machines';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
 }
 
-const { Text } = Typography;
-
 const Categories = () => {
   const navigate = useNavigate();
+  const auth = useAuthUser();
+  let machines: DetailUserWithMachine[] = auth()?.machines
+  const [selectedMachine, setSelectedMachine] = useState<DetailUserWithMachine>(machines[0])
 
   const {
 		isLoading,
 		data,
     fetchList
 	} = useFetchList<ITroubleListItem>({
-		endpoint: "troubles/machine/33fce9bc-495e-4627-8c89-a751b0bccb87",
+		endpoint: "troubles/machine/" + selectedMachine.machineId,
 	});
+
+  useEffect(()=>{
+    fetchList()
+  },[selectedMachine])
 
   const columns = [
     {
@@ -138,13 +147,35 @@ const Categories = () => {
         }
     },
 ];
-
+  
   return (
     <React.Fragment>
       <HeaderSection
         // icon={<TagOutlined />}
         title="Trouble List"
-        // subtitle="Manage your Categories"
+        rightAction={
+          <React.Fragment>
+            <Dropdown overlay={
+              <Menu>             
+                {
+                  machines.map((record) => (
+                    <Menu.Item key={record.machineId} onClick={() => setSelectedMachine(record)}>
+                      {record.machine.name}
+                    </Menu.Item>
+                  ))
+                }
+              </Menu>
+            }>
+              <Button>
+                <span className="mr-2">
+                  {selectedMachine?.machine.name}
+                </span>
+                <DownOutlined />
+              </Button>
+            </Dropdown>
+            <DatePicker style={{ marginLeft: 10 }}  />
+          </React.Fragment>
+        }
       />
       <Table
            columns={columns}
