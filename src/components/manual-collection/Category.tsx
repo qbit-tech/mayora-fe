@@ -27,9 +27,11 @@ type SingleManual = {
 interface ManualTableProps{
   data:CategoryList[],
   fetchList: () => Promise<void>;
+  idMachine: string | undefined;
 }
 function ManualTable(props: ManualTableProps) {
   const navigate = useNavigate();
+  // props.idMachine = undefined
 
   const convertedData = () : TableManualType[] => {
     return [
@@ -75,9 +77,9 @@ function ManualTable(props: ManualTableProps) {
                 <div className="">
                     {category.value1 ? `${category.value1.value} ${category.unit}` : '-'}
                     <EditOutlined 
-                      style={{ color: 'blue' }} 
-                      onClick={()=>
-                        navigate(`edit/${category.id}/shift1`)
+                      style={props.idMachine? { color: 'blue' } : {color: 'gray'}} 
+                      onClick={
+                        ()=>props.idMachine && navigate(`edit/${category.id}/shift1/${props.idMachine}`)
                       }/>
                 </div>
             );
@@ -92,9 +94,9 @@ function ManualTable(props: ManualTableProps) {
               <div className="">
                   {category.value2 ? `${category.value2.value} ${category.unit}` : '-'}
                   <EditOutlined 
-                      style={{ color: 'blue' }} 
-                      onClick={()=>
-                        navigate(`edit/${category.id}/shift2`)
+                  style={props.idMachine? { color: 'blue' } : {color: 'gray'}} 
+                  onClick={
+                    ()=>props.idMachine && navigate(`edit/${category.id}/shift2/${props.idMachine}`)
                   }/>
               </div>
           );
@@ -109,9 +111,9 @@ function ManualTable(props: ManualTableProps) {
             <div className="">
               {category.value3 ? `${category.value3.value} ${category.unit}` : '-'} 
               <EditOutlined 
-              style={{ color: 'blue' }} 
-              onClick={()=>
-                navigate(`edit/${category.id}/shift3`)
+              style={props.idMachine? { color: 'blue' } : {color: 'gray'}} 
+              onClick={
+                ()=>props.idMachine && navigate(`edit/${category.id}/shift3/${props.idMachine}`)
               }/>
             </div>
         );

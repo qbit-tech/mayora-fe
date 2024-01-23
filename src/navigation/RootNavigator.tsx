@@ -310,7 +310,7 @@ const RootNavigator: React.FC = () => {
             }
           />
            <Route
-            path="/manual-collection/edit/:idCategory/:shift"
+            path="/manual-collection/edit/:idCategory/:shift/:idMachine"
             element={
               <PrivateRoute loginPath="/login">
                 <ManualCollectionEdit />

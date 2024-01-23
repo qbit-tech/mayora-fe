@@ -20,6 +20,7 @@ import {
   Col,
   Row,
   DatePicker,
+  Spin,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
@@ -65,7 +66,8 @@ const Categories = () => {
 		data,
     fetchList
 	} = useFetchList<ITroubleListItem>({
-		endpoint: "troubles/machine/" + selectedMachine.machineId,
+		endpoint: "troubles/machine/" + (selectedMachine ? selectedMachine.machineId : ''),
+    fetchable: selectedMachine ? true : false
 	});
 
   useEffect(()=>{
@@ -147,7 +149,6 @@ const Categories = () => {
         }
     },
 ];
-  
   return (
     <React.Fragment>
       <HeaderSection
@@ -177,13 +178,13 @@ const Categories = () => {
           </React.Fragment>
         }
       />
-      <Table
-           columns={columns}
-           dataSource={data}
-           pagination={false}
-           style={{ marginTop: 10, width: '100%' }}
-           loading={isLoading}
-       />
+       <Table
+          columns={columns}
+          dataSource={data}
+          pagination={false}
+          style={{ marginTop: 10, width: '100%' }}
+          loading={isLoading}
+      />
     </React.Fragment>
   );
 };

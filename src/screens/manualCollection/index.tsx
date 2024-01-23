@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AppLayout from '../layout/AppLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FolderOpenOutlined, CheckOutlined, FormOutlined, MoreOutlined, TagOutlined, PlusSquareOutlined, CarryOutOutlined} from '@ant-design/icons';
+import { FolderOpenOutlined, CheckOutlined, FormOutlined, MoreOutlined, TagOutlined, PlusSquareOutlined, CarryOutOutlined, DownOutlined} from '@ant-design/icons';
 import {
   Pagination,
   Space,
@@ -21,7 +21,8 @@ import {
   Row,
   Tabs,
   Tree,
-  Spin
+  Spin,
+  DatePicker
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
@@ -54,12 +55,17 @@ import TabPane from '../../components/Category/TabPane';
 import axios from 'axios';
 import { IManualollectionListItem } from '../../data/model/manual-collection';
 import ManualTable from '../../components/manual-collection/Category';
+import { DetailUserWithMachine } from '../../data/model/machines';
+import { useAuthUser } from 'react-auth-kit';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
 }
 
 const Categories = () => {
+  const auth = useAuthUser();
+  let machines: DetailUserWithMachine[] = auth()?.machines
+  const [selectedMachine, setSelectedMachine] = useState<DetailUserWithMachine>(machines[0])
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [selectedLv2, setSelectedlv2] = useState<string>('')
   const [isLoadingTransaction, setIsLoading] = useState<boolean>(false)
@@ -116,7 +122,7 @@ const Categories = () => {
       icon: <FolderOpenOutlined />,
       children: child.level5.length > 0 || child.categoryLevel === 'level4' ? [
         {
-          title: <ManualTable data={child.level5} fetchList={fetchList}/>,
+          title: <ManualTable data={child.level5} fetchList={fetchList} idMachine={selectedMachine ? selectedMachine.machineId : undefined}/>,
           key: `Table-${child.id}`
         }
       ] : (child.children && child.children.length > 0) ? renderChildren(child.children) : []
@@ -133,6 +139,29 @@ const Categories = () => {
     <React.Fragment>
       <HeaderSection
         title="Manual Collection"
+        rightAction={
+          <React.Fragment>
+            <Dropdown overlay={
+              <Menu>             
+                {
+                  machines.map((record) => (
+                    <Menu.Item key={record.machineId} onClick={() => setSelectedMachine(record)}>
+                      {record.machine.name}
+                    </Menu.Item>
+                  ))
+                }
+              </Menu>
+            }>
+              <Button>
+                <span className="mr-2">
+                  {selectedMachine?.machine.name}
+                </span>
+                <DownOutlined />
+              </Button>
+            </Dropdown>
+            <DatePicker style={{ marginLeft: 10 }}  />
+          </React.Fragment>
+        }
       />
       <div>
         {
