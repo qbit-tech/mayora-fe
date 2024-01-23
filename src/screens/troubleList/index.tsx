@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AppLayout from '../layout/AppLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MoreOutlined, SearchOutlined } from '@ant-design/icons';
+import { DownOutlined, MoreOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import {
   Pagination,
   Space,
@@ -19,7 +19,9 @@ import {
   Button,
   Col,
   Row,
+  DatePicker,
 } from 'antd';
+import type { MenuProps } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
 import {
@@ -43,323 +45,145 @@ import useDetailBreadcrumbs from '../../hooks/useDetailBreadcrumbs';
 import type { TableProps } from 'antd';
 import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
+import { ITroubleListItem } from '../../data/model/trouble';
+import moment from 'moment';
+import useAuthUser from 'react-auth-kit/dist/hooks/useAuthUser';
+import { DetailUserWithMachine } from '../../data/model/machines';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
 }
 
-const { Text } = Typography;
-
 const Categories = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const [searchQuery, setSearchQuery] = React.useState<string | null>(new URLSearchParams(location.search).get('search'));
-  const [statusValue, setStatusValue] = React.useState<string | null>(new URLSearchParams(location.search).get('status'));
-  const [pageValue, setPageValue] = React.useState<string | null>(new URLSearchParams(location.search).get('page'));
-
-  const { setBreadcrumbDetails } = useDetailBreadcrumbs();
-  // const [categories, setCategories] = React.useState<CategoryProps[]>([]);
-  // const [isLoading, setIsLoading] =
-  //   React.useState<boolean>(false);
-  const [isLoadingUpdateStatus, setIsLoadingUpdateStatus] =
-    React.useState<boolean>(false);
-  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
-  const [tmpData, setTmpData] = React.useState<CategoryProps>(
-    initialProductCategories
-  );
-  const [isFirstRender, setIsFirstRender] = React.useState<boolean>(true);
+  const auth = useAuthUser();
+  let machines: DetailUserWithMachine[] = auth()?.machines
+  const [selectedMachine, setSelectedMachine] = useState<DetailUserWithMachine>(machines[0])
 
   const {
-    isLoading,
-    setIsLoading,
-    data,
-    pagination,
-    // setData,
-    setSearch,
-    fetchList,
-    setQuery,
-    changePage,
-    changeLimit,
-  } = useCustomDataFetcher<CategoryProps>({
-    endpoint: 'product/categories',
-    limit: +PAGE_SIZE_OPTIONS[0],
-  });
+		isLoading,
+		data,
+    fetchList
+	} = useFetchList<ITroubleListItem>({
+		endpoint: "troubles/machine/" + selectedMachine.machineId,
+	});
 
-  const handleStatusChange = async () => {
-    try {
-      setIsLoadingUpdateStatus(true);
-      // let newData = [];
-      // newData = data.map((item) => {
-      //   if (item.productId === tmpData.productId) {
-      //     return {
-      //       ...item,
-      //       statusLoading: true,
-      //     };
-      //   }
-      //   return item;
-      // });
-      // setData(newData);
-
-      const res = await httpRequest.patch<ResponseProps>(
-        'product/categories/' + tmpData.categoryId,
-        {
-          categoryId: tmpData.categoryId,
-          // published: !tmpData.published,
-        }
-      );
-
-      // newData = data.map((item) => {
-      //   if (item.productId === res.data.payload.productId) {
-      //     return {
-      //       ...item,
-      //       isPublished: res.data.payload.isPublished,
-      //       statusLoading: false,
-      //     };
-      //   }
-      //   return item;
-      // });
-      // setData(newData);
-
-      fetchList();
-
-      message.success('Success change ' + tmpData.categoryName + ' status.');
-
-      setIsLoadingUpdateStatus(false);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-    } catch (error: any) {
-      message.error(error.data.message);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-      setIsLoadingUpdateStatus(false);
-    }
-  };
-
-  React.useEffect(() => {
-    const newSearch = queryParams.get('search') || '';
-    const newStatus = queryParams.get('status') || '';
-    const newPage = queryParams.get('page');
-    setSearch(newSearch);
-    handleChangeStatus(newStatus);
-    if (newPage) {
-      changePage(parseInt(newPage), pagination.perPage);
-    }
-  }, [location.search, setSearchQuery, setStatusValue, setPageValue]);
-
-  React.useEffect(() => {
-    const newPage = queryParams.get('page');
-    if (newPage && isFirstRender) {
-      setIsFirstRender(false);
-      handleFilterChange(undefined, undefined, newPage);
-      return;
-    }
-    handleFilterChange(undefined, undefined, pagination.page.toString());
-  }, [changePage]);
-
-  const handleFilterChange = (search?: string, status?: string, page?: string) => {
-    if (search && status && page) {
-      setSearchQuery(search);
-      queryParams.set('search', search);
-      setStatusValue(status);
-      queryParams.set('status', status);
-      setPageValue(page);
-      queryParams.set('page', page);
-      setSearch(search);
-      handleChangeStatus(status);
-    }
-    else if (status || status === '') {
-      searchQuery && queryParams.set('search', searchQuery);
-      setStatusValue(status);
-      status && queryParams.set('status', status);
-      queryParams.set('page', pagination.page.toString());
-      handleChangeStatus(status);
-    }
-    else if (search || search === '') {
-      setSearchQuery(search);
-      search && queryParams.set('search', search);
-      statusValue && queryParams.set('status', statusValue);
-      queryParams.set('page', pagination.page.toString());
-      setSearch(search);
-    }
-    else if (page) {
-      setPageValue(page);
-      searchQuery && queryParams.set('search', searchQuery);
-      statusValue && queryParams.set('status', statusValue);
-      page && queryParams.set('page', page);
-    }
-
-    if (queryParams) {
-      const queryString = queryParams.toString();
-      window.history.pushState(null, '', `?${queryString}`);
-    }
-  };
-
-  const handleCreateCategory = () => {
-    navigate('/categories/add');
-  };
-
-  const { Option } = Select;
-
-  const handleChangeStatus = (status: string) => {
-
-    if (status !== 'all') {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: status }));
-    } else {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: '' }));
-    }
-  };
-
-  const handleClickDetail = (e: CategoryProps) => {
-    navigate(`/categories/${e.categoryId}`);
-  };
-
-  const handleClickAction = (props: CategoryProps, key: string) => {
-    if (key === 'detail') {
-      navigate(`/categories/${props.categoryId}`);
-    } else if (key === 'edit') {
-      navigate(`/categories/${props.categoryId}/edit`);
-    } else if (key === 'delete') {
-      setIsModalVisible(true)
-      setTmpData(props);
-      console.log(tmpData)
-    }
-  };
-
-  const handleDelete = async (props: CategoryProps) => {
-    const { categoryId } = props;
-
-    try {
-      setIsLoading(true);
-
-      const res = await httpRequest.delete<any>(
-        `/product/categories/${categoryId}`
-      )
-
-      fetchList()
-
-      message.success(`Delete category ${tmpData.categoryName} success`);
-      setIsLoading(false);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-    } catch (error: any) {
-      message.error(error.data.message);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-      setIsLoading(false);
-    }
-  }
-
-  console.log(data);
+  useEffect(()=>{
+    fetchList()
+  },[selectedMachine])
 
   const columns = [
     {
-      title: 'NAME',
-      dataIndex: 'categoryName',
-      key: 'categoryName',
-      width: 200,
-      render: (text: string, record: CategoryProps) => {
-        return (
-          <div className="table-link" onClick={() => handleClickDetail(record)}>
-            {record?.categoryName?.includes('-')
-              ? replaceDashWithSpace(record.categoryName)
-              : record?.categoryName?.charAt(0)?.toUpperCase() +
-              record?.categoryName?.toLowerCase()?.slice(1)}
-          </div>
-        );
-      },
+        title: 'Time',
+        dataIndex: 'time',
+        key: 'time',
+        render: (text: string, trouble: ITroubleListItem) => {
+            return (
+                <div className="">
+                  {trouble.startTime && moment(trouble.startTime).format('HH:mm')} - {trouble.endTime &&  moment(trouble.endTime).format('HH:mm')}
+                </div>
+            );
+        }
     },
     {
-      title: 'DESCRIPTION',
-      dataIndex: 'description',
-      key: 'description',
-      align: 'left',
-      render: (description: string, record: CategoryProps) => (
-        <div style={{ textAlign: 'justify' }}>{
-          record.description ? record.description.length > 200 ?
-            <p>
-              {
-                record.description.split(/\s+/, 35).join(' ') + '...'
-              } <span style={{ color: 'blue' }}>Read more</span>
-            </p> : record.description :
-            <NotSet value='No Description' />
-        }</div>
+        title: 'Duration',
+        dataIndex: 'Duration',
+        key: 'Duration',
+        render: (text: string, trouble: ITroubleListItem) => {
+          const inputMoment = moment(trouble.endTime);
+          const duration = moment.duration(inputMoment.diff(trouble.startTime));
 
-      )
+            return (
+                <div className="">
+                  {duration.asMinutes()}
+                </div>
+            );
+        }
     },
     {
-      title: 'STATUS',
-      key: 'status',
-      dataIndex: 'status',
-      render: (status: any, record: CategoryProps) => (
-        <>
-          {
-            <>
-              {/* <Switch
-              loading={record.statusLoading}
-              checked={record.isPublished}
-              onChange={() => {
-                setIsModalVisible(true);
-                setTmpData(record);
-              }}
-            /> */}
-              <Text>
-                {record.isPublished === true ?
-                  <Tag
-                    style={{
-                      border: "2px solid #31d63a",
-                      color: "#31d63a",
-                    }}>
-                    Active
-                  </Tag>
-                  :
-                  <Tag
-                    style={{
-                      border: "2px solid #D81F64",
-                      color: "#D81F64",
-                      marginBottom: "7%",
-                    }}
-                  >
-                    Inactive
-                  </Tag>}
-              </Text>
-            </>
-          }
-        </>
-      ),
+      title: 'Category',
+      dataIndex: 'Category',
+      key: 'Category',
+      render: (text: string, trouble: ITroubleListItem) => {
+          return (
+              <div className="">
+                {trouble.categoryParent.name}
+              </div>
+          );
+      }
     },
     {
-      title: 'CREATED AT',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (createdAt: any) => <div>{formatDate(createdAt)}</div>,
+      title: 'Name',
+      dataIndex: 'Name',
+      key: 'Name',
+      render: (text: string, category: ITroubleListItem) => {
+          return (
+              <div className="">
+                Andi Hidayat
+              </div>
+          );
+      }
     },
     {
-      title: 'ACTION',
-      key: 'action',
-      render: (_: any, record: CategoryProps) => (
-        <Dropdown overlay={() => menu(record)} placement="bottomRight">
-          <MoreOutlined style={{ cursor: 'pointer' }} />
-        </Dropdown>
-      ),
+      title: 'Updated At',
+      dataIndex: 'UpdatedAt',
+      key: 'UpdatedAt',
+      render: (text: string, trouble: ITroubleListItem) => {
+          return (
+              <div className="">
+                {moment(trouble.updatedAt).format('DD MMM YYYY HH:mm')}
+              </div>
+          );
+      }
     },
-  ] as TableProps<CategoryProps>['columns'];
-
-  const menu = (record: CategoryProps) => (
-    <Menu onClick={(e) => handleClickAction(record, e.key)}>
-      <Menu.Item key="edit">Edit Category</Menu.Item>
-      <Menu.Item key="detail">Detail Category</Menu.Item>
-      <Menu.Item key="delete">Delete Category</Menu.Item>
-    </Menu>
-  );
-
+    {
+        title: 'Action',
+        dataIndex: 'Action',
+        key: 'Action',
+        render: (text: string, trouble: ITroubleListItem) => {
+            return (
+              <Button type="link" onClick={()=>navigate('edit/'+trouble.id+'/'+trouble.categoryParent.id)}>Edit</Button>
+            );
+        }
+    },
+];
+  
   return (
     <React.Fragment>
       <HeaderSection
         // icon={<TagOutlined />}
         title="Trouble List"
-        // subtitle="Manage your Categories"
+        rightAction={
+          <React.Fragment>
+            <Dropdown overlay={
+              <Menu>             
+                {
+                  machines.map((record) => (
+                    <Menu.Item key={record.machineId} onClick={() => setSelectedMachine(record)}>
+                      {record.machine.name}
+                    </Menu.Item>
+                  ))
+                }
+              </Menu>
+            }>
+              <Button>
+                <span className="mr-2">
+                  {selectedMachine?.machine.name}
+                </span>
+                <DownOutlined />
+              </Button>
+            </Dropdown>
+            <DatePicker style={{ marginLeft: 10 }}  />
+          </React.Fragment>
+        }
       />
+      <Table
+           columns={columns}
+           dataSource={data}
+           pagination={false}
+           style={{ marginTop: 10, width: '100%' }}
+           loading={isLoading}
+       />
     </React.Fragment>
   );
 };

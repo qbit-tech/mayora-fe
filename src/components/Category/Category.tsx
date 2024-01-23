@@ -22,7 +22,7 @@ function Category(props: CategoryProps) {
   const handleDelete = async() =>{
     try {
         setIsLoading(true)
-        await axios.delete(process.env.REACT_APP_BASE_URL + '/category/' + props.id);
+        await axios.delete(process.env.REACT_APP_BASE_URL + '/categories/' + props.id);
 
         message.success("Successfully created category");
         setIsLoading(false)
@@ -49,7 +49,7 @@ function Category(props: CategoryProps) {
     try {
         setIsLoading(true)
         await axios.patch(
-          process.env.REACT_APP_BASE_URL + '/category/' + props.id,
+          process.env.REACT_APP_BASE_URL + '/categories/' + props.id,
           {
             name,
             categoryType,

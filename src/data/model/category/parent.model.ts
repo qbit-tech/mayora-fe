@@ -1,6 +1,6 @@
 import { IManualollectionListItem } from "../manual-collection";
 
-export interface ICategoryListItem {
+export interface CategoryParent {
   id: string;
   name: string;
   categoryParentId: string;
@@ -9,7 +9,11 @@ export interface ICategoryListItem {
   createdBy: string;
   updatedAt: Date;
   createdAt: Date;
-  level2: CategoryLevel2[];
+}
+
+export interface ICategoryListItem extends CategoryParent{
+  children: ICategoryListItem[],
+  level5: CategoryList[]
 }
 
 export interface CategoryLevel2 {
@@ -21,7 +25,8 @@ export interface CategoryLevel2 {
   createdBy: string;
   updatedAt: Date;
   createdAt: Date;
-  level3: CategoryList[];
+  childrens: CategoryList[];
+  level5: CategoryList[]
 }
 
 export interface CategoryList {

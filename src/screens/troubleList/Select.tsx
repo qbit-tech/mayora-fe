@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AppLayout from '../layout/AppLayout';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { FolderOpenOutlined, CheckOutlined, FormOutlined, MoreOutlined, TagOutlined, PlusSquareOutlined, CarryOutOutlined} from '@ant-design/icons';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { FolderOpenOutlined, CheckOutlined, FormOutlined, MoreOutlined, TagOutlined, PlusSquareOutlined} from '@ant-design/icons';
 import {
   Pagination,
   Space,
@@ -21,7 +21,8 @@ import {
   Row,
   Tabs,
   Tree,
-  Spin
+  Spin,
+  Radio
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
 import { httpRequest } from '../../helpers/api';
@@ -49,32 +50,38 @@ import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
 import { TabsProps } from 'antd/lib';
 import { DataNode } from 'antd/es/tree';
 import Category from '../../components/Category/Category';
-import { CategoryLevel2, CategoryList, ICategoryListItem } from '../../data/model';
+import { CategoryList, ICategoryListItem } from '../../data/model';
 import TabPane from '../../components/Category/TabPane';
+import { ModalAddCategoryView } from '../../components/Category/ModalAdd';
 import axios from 'axios';
-import { IManualollectionListItem } from '../../data/model/manual-collection';
-import ManualTable from '../../components/manual-collection/Category';
+
+interface ILocation {
+  id: string;
+  idCategory: string;
+}
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
 }
 
 const Categories = () => {
+  const { id, idCategory } = useParams<keyof ILocation>() as ILocation;
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [selectedLv2, setSelectedlv2] = useState<string>('')
   const [isLoadingTransaction, setIsLoading] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
   const [categoryType, setCategoryType] = useState<string>('manualcollection')
   const [unit, setUnit] = useState<string>('unit1')
+  const [selectedCategory, setSelectedCategory] = useState<string>('')
 
   const {
 		isLoading,
 		data,
     fetchList
 	} = useFetchList<ICategoryListItem>({
-		endpoint: "category-parents/manual-collection",
+		endpoint: "category-parents",
 	});
-
 
   const addNewCategory = async() =>{
     if (name === "" || name === null || name === undefined) {
@@ -92,7 +99,7 @@ const Categories = () => {
     try {
         setIsLoading(true)
         await axios.post(
-          process.env.REACT_APP_BASE_URL + '/category',
+          process.env.REACT_APP_BASE_URL + '/categories',
           {
             categoryParentId:selectedLv2,
             name,
@@ -109,36 +116,71 @@ const Categories = () => {
     }
   }
 
+  const SelectCategory = (propsCategorySelect: CategoryList) =>{
+    return(
+      <>
+        <Radio 
+          onChange={(e)=> {
+            setSelectedCategory(propsCategorySelect.id); 
+            navigate('/trouble-list/edit/'+id+'/'+propsCategorySelect.id)
+          }} 
+          checked={selectedCategory === propsCategorySelect.id}
+        >
+          {propsCategorySelect.name}
+        </Radio>
+      </>
+    )
+  }
+
   const renderChildren = (children: ICategoryListItem[]) : DataNode[] => {
     return children.map(child => ({
       title: child.name,
       key: child.id,
       icon: <FolderOpenOutlined />,
       children: child.level5.length > 0 || child.categoryLevel === 'level4' ? [
-        {
-          title: <ManualTable data={child.level5} fetchList={fetchList}/>,
-          key: `Table-${child.id}`
-        }
+        ...child.level5
+        .filter(item=>item.categoryType === 'trouble')
+        .map(next =>({
+          title: <SelectCategory {...next}/>, 
+          key: next.id
+        }))
       ] : (child.children && child.children.length > 0) ? renderChildren(child.children) : []
     }))
   }
 
+
   const tabItems: TabsProps['items'] =  data.map((item) => ({
     key: item.id,
     label: item.name,
-    children: <TabPane treeData={renderChildren(item.children)}/>,
+    children: <TabPane treeData={renderChildren((item.children))}/>,
   }));
   
   return (
     <React.Fragment>
       <HeaderSection
-        title="Manual Collection"
+        icon="back"
+        title={'Select' + ' Category'}
       />
       <div>
         {
           isLoading ? <Spin /> :
           <>
             <Tabs defaultActiveKey="1" items={tabItems} type="card" />
+            <ModalAddCategoryView
+              setName={setName}
+              setUnit={setUnit}
+              setCategoryType={setCategoryType}
+              isModal={true}
+              isModalOpen={isModalOpen}
+              onClose={() => {
+                addNewCategory()
+                setIsModalOpen(false);
+              } }
+              onSuccess={() => {
+                setIsModalOpen(false);
+              } }
+              onModalCancel={() => setIsModalOpen(false)}
+            />
           </>
         }
       </div>

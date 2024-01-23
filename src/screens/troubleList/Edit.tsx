@@ -2,6 +2,7 @@ import {
   CloseOutlined,
   DeleteOutlined,
   PlusOutlined,
+  RightOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
 import {
@@ -27,7 +28,7 @@ import {
   Table,
   TableProps,
 } from 'antd';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   UploadChangeParam,
   RcFile,
@@ -53,150 +54,117 @@ import { formatYearToTime } from '../../helpers/constant';
 import { InputWithLabel } from '../../components/InputWithLabel';
 import { IManualollectionListItem } from '../../data/model/manual-collection';
 import TextArea from 'antd/es/input/TextArea';
-import axios from 'axios';
+import { ITroubleListItem } from '../../data/model/trouble';
+import moment from 'moment';
 import { CategoryList } from '../../data/model';
+import axios from 'axios';
 
 interface ILocation {
+  id: string;
   idCategory: string;
-  shift:string;
 }
-
-interface ResponseProps extends BaseResponseProps<CategoryProps> {
-  payload: Omit<CategoryProps, 'createdAt' | 'updatedAt'>;
-}
-const { Title, Text } = Typography;
 
 const CategoryEdit: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { idCategory, shift } = useParams<keyof ILocation>() as ILocation;
+  const { id, idCategory } = useParams<keyof ILocation>() as ILocation;
   const [form] = Form.useForm();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [isLoadingAction, setIsLoadingAction] = React.useState<boolean>(false);
-  const [shiftVal, setShift] = useState<string>(shift)
-  const [remark, setRemark] = useState<string>('')
-  const [category, setCategory] = useState<string>('')
-  const [value, setValue] = useState<string>('')
-  const [idManual, setIdManual] = useState<string>('')
-  const [idCategoryData, setIdCategory] = useState<string>('')
-  const [categoryName, setCategoryName] = useState<string>('')
+  const [isLoadingCategory, setIsLoadingCategory] = React.useState<boolean>(false);
+  const [trouble, setTrouble] = React.useState<ITroubleListItem>();
+  const [category, setCategory] = React.useState<CategoryList>();
+  const [remark, setRemark] = React.useState<string>('');
 
-  const fetchDetail = async () => {
-    try {
-      setIsLoading(true);
-
-      const res = await httpRequest.get(
-        '/manual-collections/' + idCategory + "/" + shift
-      );
-      const data: IManualollectionListItem = res.data.payload
-      setIdManual(data.id)
-      setRemark(data.remark)
-      setValue(data.value)
-      setIdCategory(data.categoryId)
-
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
+    const getDuration = () =>{
+      const inputMoment = moment(trouble?.endTime);
+      const duration = moment.duration(inputMoment.diff(trouble?.startTime));
+      return duration.asMinutes()
     }
-  };
 
-  const fetchCategoryDetail = async () => {
-    try {
-      setIsLoading(true);
-
-      const res = await httpRequest.get(
-        '/categories/' + idCategory
-      );
-      const data: CategoryList = res.data.payload
-      setCategoryName(data.name)
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-    }
-  };
-
-  React.useEffect(() => {
-    if (idCategory && shift) {
-      fetchDetail();
-      fetchCategoryDetail()
-    }
-  }, [location]);
-
-  const handleCreate = async () =>{
-    console.log("cretae awal dulu")
-    if (value === "" || value === null || value === undefined) {
-      return message.error("Value Name is required");
+  const editTrouble = async() =>{
+    if (remark === "" || remark === null || remark === undefined) {
+        return message.error("Remark is required");
     }
 
     if (idCategory === "" || idCategory === null || idCategory === undefined) {
-      return message.error("Id Category is required");
+      return message.error("Category Id is required");
     }
 
-    if (shift === "" || shift === null || shift === undefined) {
-      return message.error("Shift is required");
-    }
-
-    try {
-      setIsLoading(true)
-        await axios.post(
-          process.env.REACT_APP_BASE_URL + '/manual-collections/',
-          {
-            machineId: '33fce9bc-495e-4627-8c89-a751b0bccb87',
-            categoryId: idCategory,
-            shift: shift,
-            value:value,
-            remark:remark
-          }
-        );
-        message.success("Successfully edit value manual collection");
-        navigate('/manual-collection')
-        setIsLoading(false)
-      } catch (error) {
-          setIsLoading(false)
-          return message.error("Error edit value manual collection");
-      }
-
-  }
-
-  const editManual = async() =>{
-    console.log("edit dulu")
-    if (value === "" || value === null || value === undefined) {
-        return message.error("Value Name is required");
-    }
-
-    if (idManual === "" || idManual === null || idManual === undefined) {
-      return message.error("Id Category is required");
-    }
-
-    if (idCategoryData === "" || idCategoryData === null || idCategoryData === undefined) {
-      return message.error("Id Category is required");
+    if (id === "" || id === null || id === undefined) {
+      return message.error("Id Trouble is required");
     }
 
     try {
         setIsLoading(true)
         await axios.patch(
-          process.env.REACT_APP_BASE_URL + '/manual-collections/' + idManual,
+          process.env.REACT_APP_BASE_URL + '/troubles/' + id,
           {
-            categoryId: idCategoryData,
-            value:value,
-            remark:remark
+            remark:remark,
+            categoryId:idCategory
           }
         );
         message.success("Successfully edit value manual collection");
-        navigate('/manual-collection')
         setIsLoading(false)
+        navigate('/trouble-list')
     } catch (error) {
         setIsLoading(false)
         return message.error("Error edit value manual collection");
     }
   }
 
+  React.useEffect(() => {
+    if (id) {
+      const fetchDetail = async () => {
+        try {
+          setIsLoading(true);
+
+          const res = await httpRequest.get(
+            '/troubles/' + id
+          );
+          console.log('product object : ', res.data.payload);
+          setTrouble(res.data.payload);
+          setRemark(res.data.payload.remark)
+
+          setIsLoading(false);
+        } catch (error) {
+          setIsLoading(false);
+        }
+      };
+      fetchDetail();
+    }
+  }, [location]);
+
+  React.useEffect(() => {
+    if (id) {
+      const fetchCategory = async () => {
+        try {
+          setIsLoadingCategory(true);
+
+          const res = await httpRequest.get(
+            '/categories/' + idCategory
+          );
+          setCategory(res.data.payload);
+
+          setIsLoadingCategory(false);
+        } catch (error) {
+          setIsLoadingCategory(false);
+        }
+      };
+      fetchCategory();
+    }
+  }, [idCategory]);
+
+  const CustomDropdown = () => (
+    <div style={{ display: 'none' }}>
+    </div>
+  );
+
   return (
     <React.Fragment>
       <HeaderSection
         icon="back"
-        title={'Edit'+ ' Manual Collection'}
+        title={'Edit'+ ' Trouble List'}
         // subtitle="Manage your menu data"
         rightAction={
           <Space>
@@ -208,9 +176,9 @@ const CategoryEdit: React.FC = () => {
             </Button>
             <Button
               style={{ padding: '0px 32px' }}
-              loading={isLoadingAction}
+              // loading={isLoadingAction}
               type="primary"
-              onClick={() => idManual === '' ||  idManual === undefined || idManual === null ? handleCreate() : editManual()}
+              onClick={() => editTrouble()}
             >
               Save
             </Button>
@@ -227,29 +195,33 @@ const CategoryEdit: React.FC = () => {
             // onFinish={handleSubmit}
             autoComplete="off"
           >
-            <InputWithLabel label="Shift">
+            <InputWithLabel label="Time">
                 <Input
                     style={{ marginBottom: 10 }}
                     disabled
-                    placeholder="Shift"
-                    value={shift}
+                    placeholder="Time"
+                    value={`${trouble?.startTime && moment(trouble.startTime).format('HH:mm')}-${trouble?.endTime && moment(trouble.endTime).format('HH:mm')}`}
+                />
+            </InputWithLabel>
+            <InputWithLabel label="Duration">
+                <Input
+                    style={{ marginBottom: 10 }}
+                    // onChange={(e)=>props.setValue(e.target.value)}
+                    placeholder="Duration"
+                    value={`${getDuration()}`}
+                    disabled
                 />
             </InputWithLabel>
             <InputWithLabel label="Category">
-                <Input
+                <Select
                     style={{ marginBottom: 10 }}
+                    loading={isLoadingCategory}
+                    defaultValue={category?.name}
                     placeholder="Category"
-                    value={categoryName}
-                    disabled
-                />
-            </InputWithLabel>
-            <InputWithLabel label="Value">
-                <Input
-                    style={{ marginBottom: 10 }}
-                    onChange={(e)=>setValue(e.target.value)}
-                    placeholder="Value"
-                    value={value}
-                    type='number'
+                    value={category?.name}
+                    dropdownRender={() => <CustomDropdown />}
+                    suffixIcon={<RightOutlined />}
+                    onDropdownVisibleChange={()=>navigate('/trouble-list/edit/'+id+'/'+idCategory+'/select')}
                 />
             </InputWithLabel>
             <InputWithLabel label="Remark">
