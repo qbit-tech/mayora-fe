@@ -45,6 +45,7 @@ export default function useFetchList<DataType, ExtendType = {}>(props: Props) {
     if (!fetchable) {
       return;
     }
+    console.log("fetchingg....",props.endpoint)
     try {
       setIsLoading(true);
 

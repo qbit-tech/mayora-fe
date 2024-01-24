@@ -59,6 +59,7 @@ import { CategoryList } from '../../data/model';
 interface ILocation {
   idCategory: string;
   shift:string;
+  idMachine: string
 }
 
 interface ResponseProps extends BaseResponseProps<CategoryProps> {
@@ -69,14 +70,12 @@ const { Title, Text } = Typography;
 const CategoryEdit: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { idCategory, shift } = useParams<keyof ILocation>() as ILocation;
+  const { idCategory, shift, idMachine } = useParams<keyof ILocation>() as ILocation;
   const [form] = Form.useForm();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isLoadingAction, setIsLoadingAction] = React.useState<boolean>(false);
-  const [shiftVal, setShift] = useState<string>(shift)
   const [remark, setRemark] = useState<string>('')
-  const [category, setCategory] = useState<string>('')
   const [value, setValue] = useState<string>('')
   const [idManual, setIdManual] = useState<string>('')
   const [idCategoryData, setIdCategory] = useState<string>('')
@@ -142,7 +141,7 @@ const CategoryEdit: React.FC = () => {
         await axios.post(
           process.env.REACT_APP_BASE_URL + '/manual-collections/',
           {
-            machineId: '33fce9bc-495e-4627-8c89-a751b0bccb87',
+            machineId: idMachine,
             categoryId: idCategory,
             shift: shift,
             value:value,

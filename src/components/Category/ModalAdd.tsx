@@ -1,7 +1,7 @@
 /** => import package */
-import React, { Dispatch, SetStateAction, useState } from "react";
-import { Modal, Table, Button, Input, Select, message } from "antd";
-import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
+import { Modal, Table, Button, Input, Select, message, Divider, Space, InputRef } from "antd";
+import { CloseOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { InputWithLabel } from "../InputWithLabel";
 import axios from "axios";
 
@@ -23,6 +23,18 @@ interface ModalAddCompanyProps {
 
 export const ModalAddCategoryView: React.FC<ModalAddCompanyProps> = (props) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [items, setItems] = useState(['kg', 'm','gr','min','hr'])
+    const inputRef = useRef<InputRef>(null);
+    const [newItem, setNewItem] = useState<string>('')
+
+    const addItem = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+        e.preventDefault();
+        setItems([...items, newItem]);
+        setNewItem('');
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
+      };
 
   return (
     <Modal
@@ -45,11 +57,31 @@ export const ModalAddCategoryView: React.FC<ModalAddCompanyProps> = (props) => {
         </InputWithLabel>
 
         <div style={{display:'flex', justifyContent:'space-between', width:'100%'}}>
-            <InputWithLabel label="Unit/Satuan" style={{ flex: "45%", marginRight:'5px' }}>
-                <Input
-                    defaultValue="kg"
-                    onChange={(e)=>props.setUnit(e.target.value)}
+            <InputWithLabel label="Unit/Satuan">
+                <Select
+                    style={{ width: 300 }}
+                    placeholder="Unit"
                     value={props.unit}
+                    onChange={(value)=>props.setUnit(value)}
+                    dropdownRender={(menu) => (
+                        <>
+                        {menu}
+                        <Divider style={{ margin: '8px 0' }} />
+                        <Space style={{ padding: '0 8px 4px' }}>
+                            <Input
+                                placeholder="Add new unit"
+                                ref={inputRef}
+                                value={newItem}
+                                onChange={(e)=>setNewItem(e.target.value)}
+                                onKeyDown={(e) => e.stopPropagation()}
+                            />
+                            <Button type="text" icon={<PlusOutlined />} onClick={addItem}>
+                            Add item
+                            </Button>
+                        </Space>
+                        </>
+                    )}
+                    options={items.map((item) => ({ label: item, value: item }))}
                 />
             </InputWithLabel>
             <InputWithLabel label="Category Type" style={{ flex: "45%", marginLeft:'5px' }}>
