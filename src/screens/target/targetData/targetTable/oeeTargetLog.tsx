@@ -1,59 +1,14 @@
-import React, { useState } from 'react';
-import {
-    Pagination,
-    Space,
-    Table,
-    Switch,
-    Dropdown,
-    Menu,
-    Modal,
-    message,
-    Input,
-    Select,
-    Image,
-    Tag,
-    Typography,
-    Button,
-    Col,
-    Row,
-    Tabs,
-    Tree,
-    Divider,
-} from 'antd';
-import HeaderSection from '../../../../components/HeaderSection';
-import { httpRequest } from '../../../../helpers/api';
-import {
-    BaseResponsePaginationProps,
-    BaseResponseProps,
-} from '../../../../types/config.type';
-import styled from 'styled-components';
-import useFetchList from '../../../../hooks/useFetchList';
-import useSWR from 'swr';
-import { formatDate, formatTime, formatYearToTime, formatYearToTimeWithSpace, PAGE_SIZE_OPTIONS } from '../../../../helpers/constant';
-import { initialProduct, ProductProps } from '../../../../types/products.type';
-import { initialTarget, TargetProps } from '../../../../types/target.type';
-import { initialTargetDefault, TargetDefaultProps } from '../../../../types/targetDefault.type';
-import { initialTargetOEE, TargetOEEProps } from '../../../../types/targetOEE.type';
-import {
-    CategoryProps,
-    FetchAllCategoriesResponse,
-    initialProductCategories,
-} from '../../../../types/category.type';
-import { replaceDashWithSpace } from '../../../../helpers/replaceDashWithSpace';
-import CustomPagination from '../../../../components/CustomPagination';
-import { IconArrowDown } from '../../../../assets/icons';
-import useDetailBreadcrumbs from '../../../../hooks/useDetailBreadcrumbs';
 import type { TableProps } from 'antd';
-import NotSet from '../../../../components/NotSet';
-import useCustomDataFetcher from '../../../../hooks/useCustomDataFetcher';
-import { TabsProps } from 'antd/lib';
-import { DataNode } from 'antd/es/tree';
-import InputDefaultTarget from '../../modal/InputDefaultTarget';
-import InputCurrentTarget from '../../modal/InputCurrentTarget';
-import InputOeeTarget from '../../modal/InputOeeTarget';
-import DefaultTargetData from '../defaultTargetData';
-import CurrentTargetData from '../currentTargetData';
-import OEETargetData from '../oeeTargetData';
+import {
+    Col,
+    Table,
+    Typography
+} from 'antd';
+import React from 'react';
+import CustomPagination from '../../../../components/CustomPagination';
+import { PAGE_SIZE_OPTIONS, formatYearToTimeWithSpace } from '../../../../helpers/constant';
+import useFetchList from '../../../../hooks/useFetchList';
+import { TargetOEEProps } from '../../../../types/targetOEE.type';
 
 
 

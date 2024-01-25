@@ -1,12 +1,8 @@
-const SHIFT = {
-    shift1start: '07:00:00',
-    shift1end: '12:00:00',
-
-    shift2start: '13:00:00',
-    shift2end: '16:00:00',
-
-    shift3start: '17:00:00',
-    shift3end: '20:00:00',
+const BASE_RELEASE_SHIFT = {
+    shift1: { start: '07:00:00', end: '13:59:00' },
+    shift2: { start: '14:00:00', end: '16:59:00' },
+    shift3: { start: '17:00:00', end: '23:59:00' },
+    
 }
 
-export default SHIFT;
+export default BASE_RELEASE_SHIFT;
