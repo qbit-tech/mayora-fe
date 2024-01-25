@@ -81,40 +81,6 @@ const Categories = () => {
 		endpoint: "category-parents/manual-collection",
 	});
 
-
-  const addNewCategory = async() =>{
-    if (name === "" || name === null || name === undefined) {
-        return message.error("Category Name is required");
-    }
-
-    if (categoryType === "" || categoryType === null || categoryType === undefined) {
-        return message.error("Category Type is required");
-    }
-
-    if (unit === "" || unit === null || unit === undefined) {
-        return message.error("Unit is required");
-    }
-
-    try {
-        setIsLoading(true)
-        await axios.post(
-          process.env.REACT_APP_BASE_URL + '/category',
-          {
-            categoryParentId:selectedLv2,
-            name,
-            categoryType,
-            unit
-          }
-        );
-        message.success("Successfully created category");
-        setIsLoading(false)
-        await fetchList()
-    } catch (error) {
-        setIsLoading(false)
-        return message.error("Error create category");
-    }
-  }
-
   const renderChildren = (children: ICategoryListItem[]) : DataNode[] => {
     return children.map(child => ({
       title: child.name,

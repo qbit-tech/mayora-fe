@@ -39,6 +39,7 @@ import moment from 'moment';
 
 interface ILocation {
   idCategory: string;
+  idMachine: string;
 }
 
 const { Title, Text } = Typography;
@@ -46,7 +47,7 @@ const { Title, Text } = Typography;
 const CategoryEdit: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { idCategory } = useParams<keyof ILocation>() as ILocation;
+  const { idCategory, idMachine } = useParams<keyof ILocation>() as ILocation;
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [category, setCategory] = React.useState<CategoryList>();
 
@@ -56,11 +57,10 @@ const CategoryEdit: React.FC = () => {
       console.log("bgyu",idCategory)
 
       const res = await httpRequest.get(
-        '/categories/' + idCategory 
+        '/categories/' + idCategory + '/' + idMachine
       );
       const data: CategoryList = res.data.payload
       setCategory(data)
-        console.log("dtatat",data)
 
       setIsLoading(false);
     } catch (error) {

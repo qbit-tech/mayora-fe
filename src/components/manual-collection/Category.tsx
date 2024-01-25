@@ -31,12 +31,10 @@ interface ManualTableProps{
 }
 function ManualTable(props: ManualTableProps) {
   const navigate = useNavigate();
-  // props.idMachine = undefined
 
   const convertedData = () : TableManualType[] => {
     return [
       ...props.data
-      .filter(item=> item.categoryType === 'manualcollection')
       .map(item=>{
         const shift1 = item.manualCollection.find(manual => manual.shift === 'shift1')
         const shift2 = item.manualCollection.find(manual => manual.shift === 'shift2')
@@ -48,7 +46,10 @@ function ManualTable(props: ManualTableProps) {
             value1: shift1,
             value2: shift2,
             value3: shift3,
-            total: Number(shift1 ? shift1.value : 0) + Number(shift2 ? shift2.value : 0) + Number(shift3 ? shift3.value : 0),
+            total: 
+              (shift1 && shift1.machineId === props.idMachine ? Number(shift1.value) : 0) + 
+              (shift2 && shift2.machineId === props.idMachine ? Number(shift2.value) : 0) + 
+              (shift3 && shift3.machineId === props.idMachine ? Number(shift3.value) : 0),
             unit: item.unit
           }
       })
@@ -75,12 +76,15 @@ function ManualTable(props: ManualTableProps) {
         render: (text: string, category: TableManualType) => {
             return (
                 <div className="">
-                    {category.value1 ? `${category.value1.value} ${category.unit}` : '-'}
+                  {category.value1 && category.value1.machineId === props.idMachine ? `${category.value1.value} ${category.unit}` : '-'}
+                  {
+                    (category.value1 === undefined || category.value1.machineId === props.idMachine) &&
                     <EditOutlined 
-                      style={props.idMachine? { color: 'blue' } : {color: 'gray'}} 
+                      style={{color:'blue'}}
                       onClick={
                         ()=>props.idMachine && navigate(`edit/${category.id}/shift1/${props.idMachine}`)
-                      }/>
+                    }/>
+                  }
                 </div>
             );
         }
@@ -92,12 +96,15 @@ function ManualTable(props: ManualTableProps) {
       render: (text: string, category: TableManualType) => {
           return (
               <div className="">
-                  {category.value2 ? `${category.value2.value} ${category.unit}` : '-'}
-                  <EditOutlined 
-                  style={props.idMachine? { color: 'blue' } : {color: 'gray'}} 
-                  onClick={
-                    ()=>props.idMachine && navigate(`edit/${category.id}/shift2/${props.idMachine}`)
-                  }/>
+                  {category.value2 && category.value2.machineId === props.idMachine ? `${category.value2.value} ${category.unit}` : '-'}
+                  {
+                    (category.value2 === undefined || category.value2.machineId === props.idMachine) &&
+                    <EditOutlined 
+                      style={{color:'blue'}}
+                      onClick={
+                        ()=>props.idMachine && navigate(`edit/${category.id}/shift2/${props.idMachine}`)
+                    }/>
+                  }
               </div>
           );
       }
@@ -109,12 +116,15 @@ function ManualTable(props: ManualTableProps) {
     render: (text: string, category: TableManualType) => {
         return (
             <div className="">
-              {category.value3 ? `${category.value3.value} ${category.unit}` : '-'} 
-              <EditOutlined 
-              style={props.idMachine? { color: 'blue' } : {color: 'gray'}} 
-              onClick={
-                ()=>props.idMachine && navigate(`edit/${category.id}/shift3/${props.idMachine}`)
-              }/>
+              {category.value3 && category.value3.machineId === props.idMachine ? `${category.value3.value} ${category.unit}` : '-'}
+              {
+                (category.value3 === undefined || category.value3.machineId === props.idMachine) &&
+                <EditOutlined 
+                  style={{color:'blue'}}
+                  onClick={
+                    ()=>props.idMachine && navigate(`edit/${category.id}/shift3/${props.idMachine}`)
+                }/>
+              }
             </div>
         );
     }
@@ -137,7 +147,13 @@ function ManualTable(props: ManualTableProps) {
         key: 'detail',
         render: (text: string, category: TableManualType) => {
             return (
-              <Button type="link" onClick={()=>navigate('detail/'+category.id)}>Detail</Button>
+              <>
+                {
+                  props.idMachine &&
+                  <Button type="link" onClick={()=>navigate('detail/'+category.id+'/'+props.idMachine)}>Detail</Button>
+                }
+              </>
+              
             );
         }
     },

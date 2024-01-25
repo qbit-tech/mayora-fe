@@ -318,7 +318,7 @@ const RootNavigator: React.FC = () => {
             }
           />
           <Route
-            path="/manual-collection/detail/:idCategory"
+            path="/manual-collection/detail/:idCategory/:idMachine"
             element={
               <PrivateRoute loginPath="/login">
                 <ManualCollectionDetail />

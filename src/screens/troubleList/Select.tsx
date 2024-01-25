@@ -80,7 +80,7 @@ const Categories = () => {
 		data,
     fetchList
 	} = useFetchList<ICategoryListItem>({
-		endpoint: "category-parents",
+		endpoint: "category-parents/trouble",
 	});
 
   const addNewCategory = async() =>{
@@ -139,7 +139,6 @@ const Categories = () => {
       icon: <FolderOpenOutlined />,
       children: child.level5.length > 0 || child.categoryLevel === 'level4' ? [
         ...child.level5
-        .filter(item=>item.categoryType === 'trouble')
         .map(next =>({
           title: <SelectCategory {...next}/>, 
           key: next.id
