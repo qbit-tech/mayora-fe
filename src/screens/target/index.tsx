@@ -51,9 +51,6 @@ import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
 import { TabsProps } from 'antd/lib';
 import { DataNode } from 'antd/es/tree';
-import InputDefaultTarget from './modal/InputDefaultTarget';
-import InputCurrentTarget from './modal/InputCurrentTarget';
-import InputOeeTarget from './modal/InputOeeTarget';
 import DefaultTargetData from './targetData/defaultTargetData';
 import CurrentTargetData from './targetData/currentTargetData';
 import OEETargetData from './targetData/oeeTargetData';
@@ -210,10 +207,6 @@ const Categories = () => {
             <div>
                 <Tabs defaultActiveKey="1" items={tabItems} type="card" onChange={onChange} />
             </div>
-
-            <InputDefaultTarget visibleInputDefaultTarget={isDefautModalVisible} onCancelInputDefaultTarget={handleModalCancelDefault} />
-            <InputCurrentTarget visibleInputCurrentTarget={isCurrentModalVisible} onCancelInputCurrentTarget={handleModalCancelCurrent} />
-            <InputOeeTarget visibleInputOeeTarget={isOeeModalVisible} onCancelInputOeeTarget={handleModalCancelOee} />
         </React.Fragment>
     );
 

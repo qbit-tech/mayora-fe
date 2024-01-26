@@ -1,20 +1,10 @@
 import React from 'react';
-import AppLayout from '../layout/AppLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DownOutlined, MoreOutlined, SearchOutlined } from '@ant-design/icons';
 import {
-  Pagination,
-  Space,
   Table,
-  Switch,
   Dropdown,
   Menu,
-  Modal,
-  message,
-  Input,
-  Select,
-  Image,
-  Tag,
   Typography,
   Button,
   Col,
@@ -23,30 +13,20 @@ import {
   DatePicker,
 } from 'antd';
 import HeaderSection from '../../components/HeaderSection';
-import { httpRequest } from '../../helpers/api';
 import {
   BaseResponsePaginationProps,
   BaseResponseProps,
 } from '../../types/config.type';
 import styled from 'styled-components';
-import useFetchList from '../../hooks/useFetchList';
-import useSWR from 'swr';
 import { formatDate, formatTime, PAGE_SIZE_OPTIONS } from '../../helpers/constant';
-import { initialProduct, ProductProps } from '../../types/products.type';
 import { initialRelease, ReleaseProps } from '../../types/release.type';
-import {
-  CategoryProps,
-  FetchAllCategoriesResponse,
-  initialProductCategories,
-} from '../../types/category.type';
-import { replaceDashWithSpace } from '../../helpers/replaceDashWithSpace';
-import CustomPagination from '../../components/CustomPagination';
-import { IconArrowDown } from '../../assets/icons';
-import useDetailBreadcrumbs from '../../hooks/useDetailBreadcrumbs';
 import type { TableProps } from 'antd';
-import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
-import moment from 'moment';
+// import moment from 'moment';
+import { DetailUserWithMachine } from '../../data/model/machines';
+import { useAuthUser } from 'react-auth-kit';
+import moment from 'moment-timezone';
+import BASE_RELEASE_SHIFT from '../../const/shift';
 
 interface ResponseProps extends BaseResponseProps<ReleaseProps> {
   payload: Omit<ReleaseProps, 'createdAt' | 'updatedAt'>;
@@ -65,71 +45,36 @@ const Categories = () => {
   const [machineValue, setMachineValue] = React.useState<string | null>(new URLSearchParams(location.search).get('machineId'));
   const [dateValue, setDateValue] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
   const [date, setDate] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
-
-  const { setBreadcrumbDetails } = useDetailBreadcrumbs();
-  // const [categories, setCategories] = React.useState<CategoryProps[]>([]);
-  // const [isLoading, setIsLoading] =
-  //   React.useState<boolean>(false);
-  const [isLoadingUpdateStatus, setIsLoadingUpdateStatus] =
-    React.useState<boolean>(false);
-  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
-  const [tmpData, setTmpData] = React.useState<ReleaseProps>(
-    initialRelease
-  );
+  const auth = useAuthUser();
+  let machines: DetailUserWithMachine[] = auth()?.machines
+  const [selectedMachine, setSelectedMachine] = React.useState<DetailUserWithMachine>(machines[0])
   const [isFirstRender, setIsFirstRender] = React.useState<boolean>(true);
-  const [tempRelease, setTempRelease] = React.useState<ReleaseProps>(
-    initialRelease
-  );
 
   const {
     isLoading,
-    setIsLoading,
     data,
     pagination,
-    // setData,
     setSearch,
-    fetchList,
     setQuery,
     changePage,
-    changeLimit,
   } = useCustomDataFetcher<ReleaseProps>({
     endpoint: 'releases',
     limit: +PAGE_SIZE_OPTIONS[0],
   });
-
-  // 2 1 3
-  // React.useEffect(() => {
-  //   console.log("useEffect 2")
-  //   const newSearch = queryParams.get('search') || '';
-  //   const newMachineId = queryParams.get('machineId') || '';
-  //   const newPage = queryParams.get('page');
-  //   const newDate = queryParams.get('createdAt');
-  //   setSearch(newSearch);
-  //   handleChangeMachineId(newMachineId);
-  //   setDate(newDate);
-  //   if (newPage) {
-  //     changePage(parseInt(newPage), pagination.perPage);
-  //   }
-  // }, [location.search, setSearchQuery, setMachineValue, setPageValue, setDateValue]);
 
   React.useEffect(() => {
     console.log("useEffect 1")
     const newPage = queryParams.get('page');
     const newDate = queryParams.get('createdAt') || '';
     console.log(newPage)
-    if (newPage && isFirstRender) {
+    if (isFirstRender) {
       setIsFirstRender(false);
-      handleFilterChange(undefined, undefined, newPage, undefined);
-    }
-    else if (!isFirstRender) {
-      handleFilterChange(undefined, undefined, pagination.page.toString())
+      handleFilterChange(undefined, machines[0].machineId, undefined, moment().format('YYYY-MM-DD'));
     }
   }, [changePage]);
 
-
-
-  const handleFilterChange = (search?: string, machineId?: string, page?: string, createdAt?: string) => {
-
+  const handleFilterChange = (search?: any, machineId?: string, page?: string, createdAt?: string) => {
+    console.log(123)
     if (search && machineId && page && createdAt) {
       console.log('tesMasuk 1')
       setSearchQuery(search);
@@ -190,19 +135,6 @@ const Categories = () => {
     }
   }
 
-
-
-  const { Option } = Select;
-
-  const handleChangeStatus = (status: string) => {
-
-    if (status !== 'all') {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: status }));
-    } else {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: '' }));
-    }
-  };
-
   const handleChangeMachineId = (machineId: string) => {
     setQuery((oldVal) => ({ ...oldVal, machineId: machineId }));
   }
@@ -213,82 +145,95 @@ const Categories = () => {
 
   const GroupingByHours: any = (data: ReleaseProps[]) => {
 
-    const shifts = {
-      shift1: { start: '07:00:00', end: '11:59:00' },
-      shift2: { start: '12:00:00', end: '16:59:00' },
-      shift3: { start: '17:00:00', end: '23:59:00' },
-    };
-
-    const shift1 : any = [];
-    const shift2 : any = [];
-    const shift3 : any = [];
-    let countShift1 : any = [];
-    let countShift2 : any = [];
-    let countShift3 : any = [];
-    let accumulatedByHourShift1;
-    let accumulatedByHourShift2;
-    let accumulatedByHourShift3;
-
-    const hourAccumulator: { [hour: string]: number } = {};
-
-    data.forEach(time => {
-      const momentTime = moment(time.time, 'HH:mm:ss');
-      const hourGroup = momentTime.format('HH:00');
-
-      console.log(moment(time.time))
-
-      if (!hourAccumulator[hourGroup]) {
-        hourAccumulator[hourGroup] = 0;
+    const shifts = BASE_RELEASE_SHIFT;
+  
+    const shift1: any = [];
+    const shift2: any = [];
+    const shift3: any = [];
+    let countShift1: any = [];
+    let countShift2: any = [];
+    let countShift3: any = [];
+    let accumulatedByHourShift1: any = [];
+    let accumulatedByHourShift2: any = [];
+    let accumulatedByHourShift3: any = [];
+  
+    const hourAccumulatorShift1: { [hour: string]: number } = {};
+    const hourAccumulatorShift2: { [hour: string]: number } = {};
+    const hourAccumulatorShift3: { [hour: string]: number } = {};
+  
+    data.forEach((time) => {
+      const format = 'hh:mm:ss';
+      const parsedData = moment(time.time).tz('Asia/Jakarta').format('HH:mm:ss');
+      console.log(parsedData);
+  
+      const hourGroup = moment(parsedData, format).format('HH:00');
+  
+      if (!hourAccumulatorShift1[hourGroup]) {
+        hourAccumulatorShift1[hourGroup] = 0;
       }
-
-      if (momentTime.isAfter(moment(shifts.shift1.start,'HH:mm:ss')) && momentTime.isBefore(moment(shifts.shift1.end,'HH:mm:ss'))) {
+  
+      if (!hourAccumulatorShift2[hourGroup]) {
+        hourAccumulatorShift2[hourGroup] = 0;
+      }
+  
+      if (!hourAccumulatorShift3[hourGroup]) {
+        hourAccumulatorShift3[hourGroup] = 0;
+      }
+  
+      if (parsedData >= shifts.shift1.start && parsedData <= shifts.shift1.end) {
         shift1.push({ hourGroup, amount: time.amount });
-        // countShift1 = time.amount + countShift1;
-        countShift1 = hourAccumulator[hourGroup] += time.amount;
-        accumulatedByHourShift1 = Object.entries(hourAccumulator).map(([time, amount]) => ({ time, amount }));
-      } else if (momentTime.isAfter(moment(shifts.shift2.start,'HH:mm:ss')) && momentTime.isBefore(moment(shifts.shift2.end,'HH:mm:ss'))) {
+        countShift1 = hourAccumulatorShift1[hourGroup] += time.amount;
+        accumulatedByHourShift1 = Object.entries(hourAccumulatorShift1)
+          .filter(([time, amount]) => amount !== 0)
+          .map(([time, amount]) => ({ time, amount }));
+      } 
+      
+      
+      else if (parsedData >= shifts.shift2.start && parsedData <= shifts.shift2.end) {
         shift2.push({ hourGroup, amount: time.amount });
-        // countShift2 = time.amount + countShift2;
-        countShift2 = hourAccumulator[hourGroup] += time.amount;
-        accumulatedByHourShift2 = Object.entries(hourAccumulator).map(([time, amount]) => ({ time, amount }));
-      } else if (momentTime.isAfter(moment(shifts.shift3.start,'HH:mm:ss')) && momentTime.isBefore(moment(shifts.shift3.end,'HH:mm:ss'))) {
+        countShift2 = hourAccumulatorShift2[hourGroup] += time.amount;
+        accumulatedByHourShift2 = Object.entries(hourAccumulatorShift2)
+          .filter(([time, amount]) => amount !== 0)
+          .map(([time, amount]) => ({ time, amount }));
+      } 
+      
+      
+      else if (parsedData >= shifts.shift3.start && parsedData <= shifts.shift3.end) {
         shift3.push({ hourGroup, amount: time.amount });
-        // countShift3 = time.amount + countShift3;
-        countShift3 = hourAccumulator[hourGroup] += time.amount;
-        accumulatedByHourShift3 = Object.entries(hourAccumulator).map(([time, amount]) => ({ time, amount }));
+        countShift3 = hourAccumulatorShift3[hourGroup] += time.amount;
+        accumulatedByHourShift3 = Object.entries(hourAccumulatorShift3)
+          .filter(([time, amount]) => amount !== 0)
+          .map(([time, amount]) => ({ time, amount }));
       }
-
     });
-
+  
     const groupedByShift = {
       shift1,
       shift2,
       shift3,
     };
-
+  
     const countByShift = {
       countShift1,
       countShift2,
       countShift3,
     };
-
+  
     const accumulatedByHour = {
       accumulatedByHourShift1,
       accumulatedByHourShift2,
       accumulatedByHourShift3,
     };
-
-    // const accumulatedByHour = Object.entries(hourAccumulator).map(([hour, amount]) => ({ hour, amount }));
-
+  
     return {
       groupedByShift,
       countByShift,
       accumulatedByHour,
     };
-  }
-
+  };
   
-  console.log(data)
+
+  // console.log(data)
   console.log(GroupingByHours(data));
 
   const columns = [
@@ -334,9 +279,9 @@ const Categories = () => {
             <Dropdown overlay={
               <Menu>
                 {
-                  data.map((record) => (
+                  machines.map((record) => (
                     <Menu.Item key={record.machineId} onClick={() => handleFilterChange(undefined, record.machineId, undefined, undefined)}>
-                      {record.machineId}
+                      {record.machine.name}
                     </Menu.Item>
                   ))
                 }
@@ -345,7 +290,7 @@ const Categories = () => {
               <Button>
                 <span className="mr-2">
                   {
-                    machineId
+                    machineId ? machines.filter((record) => record.machineId === machineId)[0].machine.name : machines[0].machine.name
                   }
                 </span>
                 <DownOutlined />
@@ -357,7 +302,6 @@ const Categories = () => {
             }} />
           </React.Fragment>
         }
-      // subtitle="Manage your Categories"
       />
       <div style={{ height: '500px', width: '100%', backgroundColor: 'white', padding: "20px" }}>
         <React.Fragment>
@@ -397,11 +341,11 @@ const Categories = () => {
                         </Col>
                         <Col span={12} className='text-center'>
                           <Text style={{ fontWeight: "bold", color: "red" }}>
-                            {/* {
-                              data
-                                .filter((record) => record.shift === shift)
-                                .reduce((acc, cur) => acc + cur.amount, 0) || 0
-                            } */}
+                            {
+                              shift === 'accumulatedByHourShift1' ? GroupingByHours(data).countByShift.countShift1 :
+                                shift === 'accumulatedByHourShift2' ? GroupingByHours(data).countByShift.countShift2 :
+                                  shift === 'accumulatedByHourShift3' ? GroupingByHours(data).countByShift.countShift3 : null
+                            }
                           </Text>
                         </Col>
                       </Row>
@@ -425,13 +369,6 @@ const Categories = () => {
     </React.Fragment >
   );
 };
-
-export const ContainerFilter = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-`;
 
 export default Categories;
 
