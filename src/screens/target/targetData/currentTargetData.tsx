@@ -218,9 +218,11 @@ const CurrentTargetData = ({ onSuccessCallback }: { onSuccessCallback: (value: b
                 <Row style={{ borderBottom: "2px solid rgba(5, 5, 5, 0.16)", marginBottom: 5 }}>
                     <Col>
                         <Text style={{ fontSize: 40, fontWeight: "bold" }}>
+                            
                             {
-                                data[0]?.target ? data[0]?.target : '-'
+                                data[0]?.target ? parseFloat(data[0]?.target).toLocaleString('id-ID') : '-'
                             }
+                                
                         </Text>
                     </Col>
                     <Col offset={1}>

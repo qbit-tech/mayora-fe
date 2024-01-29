@@ -127,7 +127,7 @@ const Categories = () => {
     }
 
     const handleOnSuccessChange = (value: boolean) => {
-        setOnSuccess(value); // Update the parent state when the child state changes
+        setOnSuccess(value);
     };
 
     React.useEffect(() => {

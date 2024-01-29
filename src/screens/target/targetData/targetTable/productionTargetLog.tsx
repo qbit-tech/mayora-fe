@@ -70,7 +70,7 @@ const ProductionTargetLog =
                 render: (text: string, record: TargetCurrentProps) => {
                     return (
                         <div className="">
-                            {record.target ? record.target : '-'}
+                            {record.target ? parseFloat(record.target).toLocaleString('id-ID') : '-'}
                         </div>
                     );
                 }
