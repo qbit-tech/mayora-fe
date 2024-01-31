@@ -266,7 +266,7 @@ const DefaultTargetData = () => {
                     <Col>
                         <Text style={{ fontSize: 40, fontWeight: "bold" }}>
                             {
-                                data[0]?.target ? data[0]?.target : '-'
+                                data[0]?.target ? parseFloat(data[0]?.target).toLocaleString('id-ID') : '-'
                             }
                         </Text>
                     </Col>

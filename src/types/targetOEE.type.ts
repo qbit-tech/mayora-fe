@@ -3,7 +3,7 @@ import { BaseResponsePaginationProps } from './config.type';
 export interface TargetOEEProps {
     // targetId?: string;
     id?: string;
-    target: string;
+    target: number;
     machineId: string;
     name: string;
     role: string;
@@ -25,7 +25,7 @@ export interface FetchAllTargetsResponse extends BaseResponsePaginationProps<Tar
 }
 
 export const initialTargetOEE: TargetOEEProps = {
-    target: '',
+    target: 0,
     machineId: '',
     name: '',
     role: '',

@@ -8,6 +8,7 @@ import {
     Input,
     message,
     TimePicker,
+    InputNumber,
 } from 'antd';
 import { formatDate, PAGE_SIZE_OPTIONS } from '../../../helpers/constant';
 import { initialTargetOEE, TargetOEEProps } from '../../../types/targetOEE.type';
@@ -45,6 +46,7 @@ const OEETargetData = ({ onSuccessCallback }: { onSuccessCallback: (value: boole
     const [form] = Form.useForm();
     // const [faqs, setFaqs] = React.useState<FAQSProps>(initialFaqs);
     const [field, setField] = React.useState<TargetOEEProps>(initialTargetOEE);
+
     const [dataTarget, setDataTarget] = React.useState<TargetOEEProps[]>([]);
     const [onSuccess, setOnSuccess] = React.useState<boolean>(false);
     const [onSuccessChild, setOnSuccessChild] = React.useState<boolean>(false);
@@ -139,6 +141,12 @@ const OEETargetData = ({ onSuccessCallback }: { onSuccessCallback: (value: boole
     }, [onSuccess, setOnSuccessChild, onSuccessCallback]);
 
 
+    // const checkNumber = (_: any, value: { target: number }) => {
+    //     if (value.target > 0) {
+    //       return Promise.resolve();
+    //     }
+    //     return Promise.reject(new Error('Price must be greater than zero!'));
+    //   };
 
     return (
         <React.Fragment>
@@ -159,25 +167,45 @@ const OEETargetData = ({ onSuccessCallback }: { onSuccessCallback: (value: boole
                     onFinish={data.length === 0 ? createTarget : editTarget}
                     autoComplete="off"
                 >
-                    <Form.Item
+                   
+                   <Form.Item
                         name="target"
                         label="Target"
-                        rules={[{ required: true, message: 'Please input target' }]}
+                        rules={[
+                            { required: true, message: 'Please input target' },
+                            { type: 'number', message: 'The target should be a number' },
+                            // { validator: checkNumber}
+                        ]}
                     >
-                        <Input
+
+                        <InputNumber
+                            min={1}
+                            max={100}
                             placeholder="OEE Target in %"
                             value={field.target}
                             onChange={(e) =>
-                                // setTempRelease({
-                                //     ...tempRelease,
-                                //     name: e.target.value,
-                                // })
                                 setField({
                                     ...field,
-                                    target: e.target.value,
+                                    target: e !== null ? e : 0
                                 })
                             }
+                            style={{ width: '100%' }}
                         />
+
+                        {/* <Input
+                            type="number"
+                            placeholder="OEE Target in %"
+                            value={field.target}
+                            onChange={(e) =>
+                                setField({
+                                    ...field,
+                                    target: parseInt(e.target.value),
+                                })
+                            }
+                        /> */}
+
+
+
                     </Form.Item>
                 </Form>
 
@@ -204,7 +232,7 @@ const OEETargetData = ({ onSuccessCallback }: { onSuccessCallback: (value: boole
                 </Row>
             </Col>
 
-            <OEETargetLog onSuccess={onSuccess} setOnSuccess={setOnSuccess} display={false}/>
+            <OEETargetLog onSuccess={onSuccess} setOnSuccess={setOnSuccess} display={false} />
 
         </React.Fragment>
     );
