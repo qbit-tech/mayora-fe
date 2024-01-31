@@ -27,6 +27,8 @@ import { DetailUserWithMachine } from '../../data/model/machines';
 import { useAuthUser } from 'react-auth-kit';
 import moment from 'moment-timezone';
 import BASE_RELEASE_SHIFT from '../../const/shift';
+import ReleaseAddModal from './releaseModal/addRelease';
+import useFetchList from '../../hooks/useFetchList';
 
 interface ResponseProps extends BaseResponseProps<ReleaseProps> {
   payload: Omit<ReleaseProps, 'createdAt' | 'updatedAt'>;
@@ -49,6 +51,7 @@ const Categories = () => {
   let machines: DetailUserWithMachine[] = auth()?.machines
   const [selectedMachine, setSelectedMachine] = React.useState<DetailUserWithMachine>(machines[0])
   const [isFirstRender, setIsFirstRender] = React.useState<boolean>(true);
+  const [visibleInputRelease, setVisibleInputRelease] = React.useState(false);
 
   const {
     isLoading,
@@ -57,9 +60,10 @@ const Categories = () => {
     setSearch,
     setQuery,
     changePage,
-  } = useCustomDataFetcher<ReleaseProps>({
+    fetchList,
+  } = useFetchList<ReleaseProps>({
     endpoint: 'releases',
-    limit: +PAGE_SIZE_OPTIONS[0],
+    limit: +PAGE_SIZE_OPTIONS[3],
   });
 
   React.useEffect(() => {
@@ -233,7 +237,7 @@ const Categories = () => {
   };
   
 
-  // console.log(data)
+  console.log(data)
   console.log(GroupingByHours(data));
 
   const columns = [
@@ -269,6 +273,21 @@ const Categories = () => {
 
   const totalAmount = data.reduce((acc, cur) => acc + cur.amount, 0);
 
+
+  const handleAddRelease = () => {
+    setVisibleInputRelease(true);
+  }
+
+  const handleCancelInputRelease = () => {
+    setVisibleInputRelease(false);
+  }
+
+  const handleCreateSuccess = () => {
+    fetchList();
+  }
+
+  const isReleaseDebuggingEnabled = process.env.REACT_APP_SHOW_CREATE_RELEASE === 'TRUE';
+
   return (
     <React.Fragment>
       <HeaderSection
@@ -276,6 +295,12 @@ const Categories = () => {
         title="Release"
         rightAction={
           <React.Fragment>
+            { isReleaseDebuggingEnabled && (
+              <Button className="mr-2" type="primary" onClick={handleAddRelease}>
+                Add New Release
+              </Button>
+            )}
+
             <Dropdown overlay={
               <Menu>
                 {
@@ -354,6 +379,8 @@ const Categories = () => {
 
               </React.Fragment>
             ))}
+
+            <ReleaseAddModal visibleInputRelease={visibleInputRelease} onCancelInputRelease={handleCancelInputRelease} onCreateSuccess={handleCreateSuccess} />
 
             {/* <CustomPagination
               data={data && data}
