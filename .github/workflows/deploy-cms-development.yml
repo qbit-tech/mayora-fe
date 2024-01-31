@@ -65,6 +65,7 @@ jobs:
           echo REACT_APP_CHECK_HEALTH_URL=https://mayora-api-development.qode.biz.id >> .env.development
           echo REACT_APP_CMS_BASE_URL=https://mayora-cms-development.qode.biz.id >> .env.development
           echo REACT_APP_AZURE_ENTRA_APP_ID=${{ secrets.AZURE_ENTRA_APP_ID }} >> .env.development
+          echo REACT_APP_SHOW_CREATE_RELEASE=TRUE >> .env.development
           cat .env.development
 
       - name: Build development
