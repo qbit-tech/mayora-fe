@@ -28,6 +28,7 @@ import { httpRequest } from '../../helpers/api';
 import {
   BaseResponsePaginationProps,
   BaseResponseProps,
+  HttpParam,
 } from '../../types/config.type';
 import styled from 'styled-components';
 import useFetchList from '../../hooks/useFetchList';
@@ -53,6 +54,7 @@ import { ICategoryListItem } from '../../data/model';
 import TabPane from '../../components/Category/TabPane';
 import { ModalAddCategoryView } from '../../components/Category/ModalAdd';
 import axios from 'axios';
+import { Http } from '../../utility/http';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
@@ -88,19 +90,27 @@ const Categories = () => {
     }
 
     try {
-        setIsLoading(true)
-        await axios.post(
-          process.env.REACT_APP_BASE_URL + '/categories',
-          {
-            categoryParentId:selectedLv2,
-            name,
-            categoryType,
-            unit
-          }
-        );
-        message.success("Successfully created category");
-        setIsLoading(false)
+      setIsLoading(true)
+      const params: HttpParam = {
+        data: {
+          categoryParentId:selectedLv2,
+          name,
+          categoryType,
+          unit
+        },
+        method: "post",
+        path: 'categories/'
+      };
+
+      const result = await Http(params);
+      if (result.code === "success") {
         await fetchList()
+        setIsLoading(false)
+        message.success("Successfully created category");
+      }else{
+        setIsLoading(false)
+        return message.error("Error create category");
+      }
     } catch (error) {
         setIsLoading(false)
         return message.error("Error create category");

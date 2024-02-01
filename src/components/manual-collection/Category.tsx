@@ -27,7 +27,7 @@ type SingleManual = {
 interface ManualTableProps{
   data:CategoryList[],
   fetchList: () => Promise<void>;
-  idMachine: string | undefined;
+  idMachine: number | undefined;
 }
 function ManualTable(props: ManualTableProps) {
   const navigate = useNavigate();
@@ -36,9 +36,9 @@ function ManualTable(props: ManualTableProps) {
     return [
       ...props.data
       .map(item=>{
-        const shift1 = item.manualCollection.find(manual => manual.shift === 'shift1')
-        const shift2 = item.manualCollection.find(manual => manual.shift === 'shift2')
-        const shift3 = item.manualCollection.find(manual => manual.shift === 'shift3')
+        const shift1 = item.manualCollection.find(manual => manual.shift === 1)
+        const shift2 = item.manualCollection.find(manual => manual.shift === 2)
+        const shift3 = item.manualCollection.find(manual => manual.shift === 3)
 
         return {
             id: item.id,
@@ -82,7 +82,7 @@ function ManualTable(props: ManualTableProps) {
                     <EditOutlined 
                       style={{color:'blue'}}
                       onClick={
-                        ()=>props.idMachine && navigate(`edit/${category.id}/shift1/${props.idMachine}`)
+                        ()=>props.idMachine && navigate(`edit/${category.id}/1/${props.idMachine}`)
                     }/>
                   }
                 </div>
@@ -102,7 +102,7 @@ function ManualTable(props: ManualTableProps) {
                     <EditOutlined 
                       style={{color:'blue'}}
                       onClick={
-                        ()=>props.idMachine && navigate(`edit/${category.id}/shift2/${props.idMachine}`)
+                        ()=>props.idMachine && navigate(`edit/${category.id}/2/${props.idMachine}`)
                     }/>
                   }
               </div>
@@ -122,7 +122,7 @@ function ManualTable(props: ManualTableProps) {
                 <EditOutlined 
                   style={{color:'blue'}}
                   onClick={
-                    ()=>props.idMachine && navigate(`edit/${category.id}/shift3/${props.idMachine}`)
+                    ()=>props.idMachine && navigate(`edit/${category.id}/3/${props.idMachine}`)
                 }/>
               }
             </div>

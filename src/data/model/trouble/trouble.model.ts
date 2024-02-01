@@ -16,4 +16,8 @@ export interface Trouble {
 
 export interface ITroubleListItem extends Trouble{
   categoryParent: CategoryList;
+  user: {
+    userId: string,
+    name: string
+  }
 }

@@ -39,7 +39,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import HeaderSection from '../../components/HeaderSection';
 import AppLayout from '../layout/AppLayout';
 import { httpRequest } from '../../helpers/api';
-import { BaseResponseProps } from '../../types/config.type';
+import { BaseResponseProps, HttpParam } from '../../types/config.type';
 import styled from 'styled-components';
 import { generateFormRules } from '../../helpers/formRules';
 import { generateQueryString } from '../../helpers/generateQueryString';
@@ -58,6 +58,7 @@ import { ITroubleListItem } from '../../data/model/trouble';
 import moment from 'moment';
 import { CategoryList } from '../../data/model';
 import axios from 'axios';
+import { Http } from '../../utility/http';
 
 interface ILocation {
   id: string;
@@ -94,22 +95,26 @@ const CategoryEdit: React.FC = () => {
     if (id === "" || id === null || id === undefined) {
       return message.error("Id Trouble is required");
     }
-
     try {
-        setIsLoading(true)
-        await axios.patch(
-          process.env.REACT_APP_BASE_URL + '/troubles/' + id,
-          {
-            remark:remark,
-            categoryId:idCategory
-          }
-        );
-        message.success("Successfully edit value manual collection");
-        setIsLoading(false)
+      setIsLoading(true)
+      const params: HttpParam = {
+        data: {
+          remark:remark,
+          categoryId:idCategory
+        },
+        method: "patch",
+        path: 'troubles/' + id,
+      };
+
+      const result = await Http(params);
+      if (result.code === "success") {
         navigate('/trouble-list')
+        message.success("Successfully edit trouble");
+      }
+      setIsLoading(false)
     } catch (error) {
         setIsLoading(false)
-        return message.error("Error edit value manual collection");
+        return message.error("Error edit trouble");
     }
   }
 
