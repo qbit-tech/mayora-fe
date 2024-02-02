@@ -16,7 +16,7 @@ export const Http = async (
     let percentCompleted;
     params.showMessage =
       params.showMessage !== undefined ? params.showMessage : true;
-    const token = localStorage.getItem('APP_AUTH_TOKEN')
+    const token = localStorage.getItem('_auth')
     let query = params.query
       ? "?" + queryString.stringify(params.query, { arrayFormat: "bracket" })
       : "";
@@ -60,7 +60,7 @@ export const Http = async (
       }
 
       if (err.response.status === 401 || err.response.status === 403) {
-        localStorage.removeItem("APP_AUTH_TOKEN");
+        localStorage.removeItem("_auth");
         window.location.href = "/login";
       }
 

@@ -57,6 +57,8 @@ import { IManualollectionListItem } from '../../data/model/manual-collection';
 import ManualTable from '../../components/manual-collection/Category';
 import { DetailUserWithMachine } from '../../data/model/machines';
 import { useAuthUser } from 'react-auth-kit';
+import dayjs from 'dayjs';
+import moment from 'moment';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
@@ -66,20 +68,19 @@ const Categories = () => {
   const auth = useAuthUser();
   let machines: DetailUserWithMachine[] = auth()?.machines
   const [selectedMachine, setSelectedMachine] = useState<DetailUserWithMachine>(machines[0])
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [selectedLv2, setSelectedlv2] = useState<string>('')
-  const [isLoadingTransaction, setIsLoading] = useState<boolean>(false)
-  const [name, setName] = useState<string>('')
-  const [categoryType, setCategoryType] = useState<string>('manualcollection')
-  const [unit, setUnit] = useState<string>('unit1')
+  const [date, setDate] = useState<string>(moment().format('YYYY-MM-DD'))
 
   const {
 		isLoading,
 		data,
     fetchList
 	} = useFetchList<ICategoryListItem>({
-		endpoint: "category-parents/manual-collection",
+		endpoint: "category-parents/manual-collection" + '/' + date,
 	});
+
+  useEffect(()=>{
+    fetchList()
+  },[date])
 
   const renderChildren = (children: ICategoryListItem[]) : DataNode[] => {
     return children.map(child => ({
@@ -125,7 +126,7 @@ const Categories = () => {
                 <DownOutlined />
               </Button>
             </Dropdown>
-            <DatePicker style={{ marginLeft: 10 }}  />
+            <DatePicker style={{ marginLeft: 10 }} value={dayjs(date, 'YYYY-MM-DD')} onChange={(value, stringValue)=>setDate(stringValue)}/>
           </React.Fragment>
         }
       />
