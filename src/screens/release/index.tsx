@@ -43,7 +43,7 @@ const Categories = () => {
   const [searchQuery, setSearchQuery] = React.useState<string | null>(new URLSearchParams(location.search).get('search'));
   const [statusValue, setStatusValue] = React.useState<string | null>(new URLSearchParams(location.search).get('status'));
   const [pageValue, setPageValue] = React.useState<string | null>(new URLSearchParams(location.search).get('page'));
-  const [machineId, setMachineId] = React.useState<string | null>(new URLSearchParams(location.search).get('machineId'));
+  const [machineId, setMachineId] = React.useState<number | null>(Number(new URLSearchParams(location.search).get('machineId')));
   const [machineValue, setMachineValue] = React.useState<string | null>(new URLSearchParams(location.search).get('machineId'));
   const [dateValue, setDateValue] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
   const [date, setDate] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
@@ -77,14 +77,14 @@ const Categories = () => {
     }
   }, [changePage]);
 
-  const handleFilterChange = (search?: any, machineId?: string, page?: string, createdAt?: string) => {
+  const handleFilterChange = (search?: any, machineId?: number, page?: string, createdAt?: string) => {
     console.log(123)
     if (search && machineId && page && createdAt) {
       console.log('tesMasuk 1')
       setSearchQuery(search);
       queryParams.set('search', search);
       setMachineId(machineId);
-      queryParams.set('machineId', machineId);
+      queryParams.set('machineId', machineId.toString());
       setPageValue(page);
       queryParams.set('pageTesIf1', page);
       setDate(createdAt);
@@ -92,12 +92,12 @@ const Categories = () => {
       setSearch(search);
       handleChangeMachineId(machineId);
     }
-    if (machineId || machineId === '') {
+    if (machineId || machineId === 0) {
       // ketika masuk machineId
       console.log('tesMasuk 2')
       searchQuery && queryParams.set('search', searchQuery);
       setMachineId(machineId);
-      machineId && queryParams.set('machineId', machineId);
+      machineId && queryParams.set('machineId', machineId.toString());
       queryParams.set('pageTesIf2', pagination.page.toString());
       handleChangeMachineId(machineId);
     }
@@ -105,7 +105,7 @@ const Categories = () => {
       console.log('tesMasuk 3')
       setSearchQuery(search);
       search && queryParams.set('search', search);
-      machineId && queryParams.set('machineId', machineId);
+      machineId && queryParams.set('machineId', machineId.toString());
       queryParams.set('pageTesIf3', pagination.page.toString());
       setSearch(search);
     }
@@ -139,7 +139,7 @@ const Categories = () => {
     }
   }
 
-  const handleChangeMachineId = (machineId: string) => {
+  const handleChangeMachineId = (machineId: number) => {
     setQuery((oldVal) => ({ ...oldVal, machineId: machineId }));
   }
 

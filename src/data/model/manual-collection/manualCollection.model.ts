@@ -1,9 +1,9 @@
 export interface IManualollectionListItem {
   id: string;
-  machineId: string;
+  machineId: number;
   categoryId: string;
   value: string;
-  shift: string;
+  shift: number;
   remark: string;
   updatedBy: string;
   createdBy: string;

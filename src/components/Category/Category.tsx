@@ -5,6 +5,8 @@ import axios from 'axios';
 import React, { useState } from 'react'
 import styled from 'styled-components';
 import { CategoryList } from '../../data/model';
+import { HttpParam } from '../../types/config.type';
+import { Http } from '../../utility/http';
 import { ModalAddCategoryView } from './ModalAdd';
 
 interface CategoryProps extends CategoryList{
@@ -21,15 +23,26 @@ function Category(props: CategoryProps) {
 
   const handleDelete = async() =>{
     try {
-        setIsLoading(true)
-        await axios.delete(process.env.REACT_APP_BASE_URL + '/categories/' + props.id);
+      setIsLoading(true)
+      const params: HttpParam = {
+        data: {
+          name,
+          categoryType,
+          unit
+        },
+        method: "delete",
+        path: 'categories/' + props.id,
+      };
 
-        message.success("Successfully created category");
-        setIsLoading(false)
+      const result = await Http(params);
+      if (result.code === "success") {
         await props.fetchList()
+        message.success("Successfully deleted category");
+      }
+      setIsLoading(false)
     } catch (error) {
         setIsLoading(false)
-        message.error("Error create category");
+        return message.error("Error delete category");
     }
   }
 
@@ -47,21 +60,26 @@ function Category(props: CategoryProps) {
     }
 
     try {
-        setIsLoading(true)
-        await axios.patch(
-          process.env.REACT_APP_BASE_URL + '/categories/' + props.id,
-          {
-            name,
-            categoryType,
-            unit
-          }
-        );
-        message.success("Successfully created category");
-        setIsLoading(false)
+      setIsLoading(true)
+      const params: HttpParam = {
+        data: {
+          name,
+          categoryType,
+          unit
+        },
+        method: "patch",
+        path: 'categories/' + props.id,
+      };
+
+      const result = await Http(params);
+      if (result.code === "success") {
         await props.fetchList()
+        message.success("Successfully created category");
+      }
+      setIsLoading(false)
     } catch (error) {
         setIsLoading(false)
-        return message.error("Error create category");
+        return message.error("Error edit trouble");
     }
   }
 

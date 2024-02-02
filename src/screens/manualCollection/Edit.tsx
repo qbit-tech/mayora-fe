@@ -38,7 +38,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import HeaderSection from '../../components/HeaderSection';
 import AppLayout from '../layout/AppLayout';
 import { httpRequest } from '../../helpers/api';
-import { BaseResponseProps } from '../../types/config.type';
+import { BaseResponseProps, HttpParam } from '../../types/config.type';
 import styled from 'styled-components';
 import { generateFormRules } from '../../helpers/formRules';
 import { generateQueryString } from '../../helpers/generateQueryString';
@@ -55,6 +55,7 @@ import { IManualollectionListItem } from '../../data/model/manual-collection';
 import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { CategoryList } from '../../data/model';
+import { Http } from '../../utility/http';
 
 interface ILocation {
   idCategory: string;
@@ -86,7 +87,7 @@ const CategoryEdit: React.FC = () => {
       setIsLoading(true);
 
       const res = await httpRequest.get(
-        '/manual-collections/' + idCategory + "/" + shift
+        '/manual-collections/' + idCategory + "/" + Number(shift)
       );
       const data: IManualollectionListItem = res.data.payload
       setIdManual(data.id)
@@ -138,28 +139,35 @@ const CategoryEdit: React.FC = () => {
 
     try {
       setIsLoading(true)
-        await axios.post(
-          process.env.REACT_APP_BASE_URL + '/manual-collections/',
-          {
-            machineId: idMachine,
-            categoryId: idCategory,
-            shift: shift,
-            value:value,
-            remark:remark
-          }
-        );
-        message.success("Successfully edit value manual collection");
+      const params: HttpParam = {
+        data: {
+          machineId: idMachine,
+          categoryId: idCategory,
+          shift: Number(shift),
+          value:value,
+          remark:remark
+        },
+        method: "post",
+        path: 'manual-collections'
+      };
+
+      const result = await Http(params);
+      if (result.code === "success") {
         navigate('/manual-collection')
         setIsLoading(false)
-      } catch (error) {
-          setIsLoading(false)
-          return message.error("Error edit value manual collection");
+        message.success("Successfully created manual collection");
+      }else{
+        setIsLoading(false)
+        return message.error("Error create category");
       }
+    } catch (error) {
+        setIsLoading(false)
+        return message.error("Error create category");
+    }
 
   }
 
   const editManual = async() =>{
-    console.log("edit dulu")
     if (value === "" || value === null || value === undefined) {
         return message.error("Value Name is required");
     }
@@ -173,21 +181,29 @@ const CategoryEdit: React.FC = () => {
     }
 
     try {
-        setIsLoading(true)
-        await axios.patch(
-          process.env.REACT_APP_BASE_URL + '/manual-collections/' + idManual,
-          {
-            categoryId: idCategoryData,
-            value:value,
-            remark:remark
-          }
-        );
-        message.success("Successfully edit value manual collection");
+      setIsLoading(true)
+      const params: HttpParam = {
+        data: {
+          categoryId: idCategoryData,
+          value:value,
+          remark:remark
+        },
+        method: "patch",
+        path: 'manual-collections/' + idManual
+      };
+
+      const result = await Http(params);
+      if (result.code === "success") {
         navigate('/manual-collection')
         setIsLoading(false)
+        message.success("Successfully edited manual collection");
+      }else{
+        setIsLoading(false)
+        return message.error("Error create category");
+      }
     } catch (error) {
         setIsLoading(false)
-        return message.error("Error edit value manual collection");
+        return message.error("Error create category");
     }
   }
 
