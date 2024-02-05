@@ -37,15 +37,13 @@ import {
   FetchAllCategoriesResponse,
   initialProductCategories,
 } from '../../types/category.type';
-import { replaceDashWithSpace } from '../../helpers/replaceDashWithSpace';
-import CustomPagination from '../../components/CustomPagination';
-import { IconArrowDown } from '../../assets/icons';
-import useDetailBreadcrumbs from '../../hooks/useDetailBreadcrumbs';
-import type { TableProps } from 'antd';
-import NotSet from '../../components/NotSet';
 import useCustomDataFetcher from '../../hooks/useCustomDataFetcher';
 import { DownloadOutlined } from '@ant-design/icons';
 import { FileExcelOutlined } from '@ant-design/icons';
+import { useAuthUser } from 'react-auth-kit';
+import { DetailUserWithMachine } from '../../data/model/machines';
+import moment from 'moment';
+import dayjs from 'dayjs';
 
 interface ResponseProps extends BaseResponseProps<ProductProps> {
   payload: Omit<ProductProps, 'createdAt' | 'updatedAt'>;
@@ -60,18 +58,18 @@ const Categories = () => {
   const [searchQuery, setSearchQuery] = React.useState<string | null>(new URLSearchParams(location.search).get('search'));
   const [statusValue, setStatusValue] = React.useState<string | null>(new URLSearchParams(location.search).get('status'));
   const [pageValue, setPageValue] = React.useState<string | null>(new URLSearchParams(location.search).get('page'));
-
-  const { setBreadcrumbDetails } = useDetailBreadcrumbs();
-  // const [categories, setCategories] = React.useState<CategoryProps[]>([]);
-  // const [isLoading, setIsLoading] =
-  //   React.useState<boolean>(false);
-  const [isLoadingUpdateStatus, setIsLoadingUpdateStatus] =
-    React.useState<boolean>(false);
-  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
-  const [tmpData, setTmpData] = React.useState<CategoryProps>(
-    initialProductCategories
-  );
+  const [machineId, setMachineId] = React.useState<number | null>(Number(new URLSearchParams(location.search).get('machineId')));
+  const [machineValue, setMachineValue] = React.useState<string | null>(new URLSearchParams(location.search).get('machineId'));
+  const [dateValue, setDateValue] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
+  const [date, setDate] = React.useState<string | null>(new URLSearchParams(location.search).get('createdAt'));
+  const auth = useAuthUser();
+  let machines: DetailUserWithMachine[] = auth()?.machines
+  const [selectedMachine, setSelectedMachine] = React.useState<DetailUserWithMachine>(machines[0])
   const [isFirstRender, setIsFirstRender] = React.useState<boolean>(true);
+  const [visibleInputRelease, setVisibleInputRelease] = React.useState(false);
+  const [reportDuration, setReportDuration] = React.useState<string>('daily');
+  const [selectedWeeks, setSelectedWeeks] = React.useState<string[]>([]);
+  const [selectedMonths, setSelectedMonths] = React.useState<string[]>([]);
 
   const {
     isLoading,
@@ -91,15 +89,15 @@ const Categories = () => {
 
 
   React.useEffect(() => {
-    const newSearch = queryParams.get('search') || '';
-    const newStatus = queryParams.get('status') || '';
+    console.log("useEffect 1")
     const newPage = queryParams.get('page');
-    setSearch(newSearch);
-    handleChangeStatus(newStatus);
-    if (newPage) {
-      changePage(parseInt(newPage), pagination.perPage);
+    const newDate = queryParams.get('createdAt') || '';
+    console.log(newPage)
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      handleFilterChange(undefined, machines[0].machineId, undefined, moment().format('YYYY-MM-DD'));
     }
-  }, [location.search, setSearchQuery, setStatusValue, setPageValue]);
+  }, [changePage]);
 
   React.useEffect(() => {
     const newPage = queryParams.get('page');
@@ -111,198 +109,106 @@ const Categories = () => {
     handleFilterChange(undefined, undefined, pagination.page.toString());
   }, [changePage]);
 
-  const handleFilterChange = (search?: string, status?: string, page?: string) => {
-    if (search && status && page) {
+  const handleFilterChange = (search?: any, machineId?: number, page?: string, createdAt?: string) => {
+    console.log(123)
+    if (search && machineId && page && createdAt) {
+      console.log('tesMasuk 1')
       setSearchQuery(search);
       queryParams.set('search', search);
-      setStatusValue(status);
-      queryParams.set('status', status);
+      setMachineId(machineId);
+      queryParams.set('machineId', machineId.toString());
       setPageValue(page);
-      queryParams.set('page', page);
+      queryParams.set('pageTesIf1', page);
+      setDate(createdAt);
+      queryParams.set('createdAt', createdAt);
       setSearch(search);
-      handleChangeStatus(status);
+      handleChangeMachineId(machineId);
     }
-    else if (status || status === '') {
+    if (machineId || machineId === 0) {
+      // ketika masuk machineId
+      console.log('tesMasuk 2')
       searchQuery && queryParams.set('search', searchQuery);
-      setStatusValue(status);
-      status && queryParams.set('status', status);
-      queryParams.set('page', pagination.page.toString());
-      handleChangeStatus(status);
+      setMachineId(machineId);
+      machineId && queryParams.set('machineId', machineId.toString());
+      queryParams.set('pageTesIf2', pagination.page.toString());
+      handleChangeMachineId(machineId);
     }
-    else if (search || search === '') {
+    if (search || search === '') {
+      console.log('tesMasuk 3')
       setSearchQuery(search);
       search && queryParams.set('search', search);
-      statusValue && queryParams.set('status', statusValue);
-      queryParams.set('page', pagination.page.toString());
+      machineId && queryParams.set('machineId', machineId.toString());
+      queryParams.set('pageTesIf3', pagination.page.toString());
       setSearch(search);
     }
-    else if (page) {
+    if (createdAt) {
+      console.log(`Ini true lagi ${createdAt}`)
+      // ketika masuk date
+      console.log('tesMasuk 5')
+      setDateValue(createdAt);
+      searchQuery && queryParams.set('search', searchQuery);
+      // machineId && queryParams.set('machineId', machineId);
+      createdAt && queryParams.set('createdAt', createdAt);
+      // queryParams.set('pageTesIf10', pagination.page.toString());
+      handleCreatedAt(createdAt);
+    }
+    if (page) {
+      // ketika home page
+      console.log('tesMasuk 4')
       setPageValue(page);
       searchQuery && queryParams.set('search', searchQuery);
-      statusValue && queryParams.set('status', statusValue);
       page && queryParams.set('page', page);
     }
 
     if (queryParams) {
+      // ketika home page
+      console.log('tesMasuk 6')
+      console.log(`${queryParams.toString()}`)
+      console.log(`${queryParams}`)
       const queryString = queryParams.toString();
-      window.history.pushState(null, '', `?${queryString}`);
-    }
-  };
-
-
-  const { Option } = Select;
-
-  const handleChangeStatus = (status: string) => {
-
-    if (status !== 'all') {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: status }));
-    } else {
-      setQuery((oldVal) => ({ ...oldVal, isPublished: '' }));
-    }
-  };
-
-  const handleClickDetail = (e: CategoryProps) => {
-    navigate(`/categories/${e.categoryId}`);
-  };
-
-  const handleClickAction = (props: CategoryProps, key: string) => {
-    if (key === 'detail') {
-      navigate(`/categories/${props.categoryId}`);
-    } else if (key === 'edit') {
-      navigate(`/categories/${props.categoryId}/edit`);
-    } else if (key === 'delete') {
-      setIsModalVisible(true)
-      setTmpData(props);
-      console.log(tmpData)
-    }
-  };
-
-  const handleDelete = async (props: CategoryProps) => {
-    const { categoryId } = props;
-
-    try {
-      setIsLoading(true);
-
-      const res = await httpRequest.delete<any>(
-        `/product/categories/${categoryId}`
-      )
-
-      fetchList()
-
-      message.success(`Delete category ${tmpData.categoryName} success`);
-      setIsLoading(false);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-    } catch (error: any) {
-      message.error(error.data.message);
-      setIsModalVisible(false);
-      setTmpData(initialProductCategories);
-      setIsLoading(false);
+      console.log(`Ini query ${queryString}`)
+      window.history.replaceState(null, '', `?${queryString}`);
     }
   }
 
-  console.log(data);
+  const handleChangeMachineId = (machineId: number) => {
+    setQuery((oldVal) => ({ ...oldVal, machineId: machineId }));
+  }
 
-  const columns = [
-    {
-      title: 'NAME',
-      dataIndex: 'categoryName',
-      key: 'categoryName',
-      width: 200,
-      render: (text: string, record: CategoryProps) => {
-        return (
-          <div className="table-link" onClick={() => handleClickDetail(record)}>
-            {record?.categoryName?.includes('-')
-              ? replaceDashWithSpace(record.categoryName)
-              : record?.categoryName?.charAt(0)?.toUpperCase() +
-              record?.categoryName?.toLowerCase()?.slice(1)}
-          </div>
-        );
-      },
-    },
-    {
-      title: 'DESCRIPTION',
-      dataIndex: 'description',
-      key: 'description',
-      align: 'left',
-      render: (description: string, record: CategoryProps) => (
-        <div style={{ textAlign: 'justify' }}>{
-          record.description ? record.description.length > 200 ?
-            <p>
-              {
-                record.description.split(/\s+/, 35).join(' ') + '...'
-              } <span style={{ color: 'blue' }}>Read more</span>
-            </p> : record.description :
-            <NotSet value='No Description' />
-        }</div>
+  const handleCreatedAt = (createdAt: string) => {
+    setQuery((oldVal) => ({ ...oldVal, createdAt: createdAt }));
+  }
 
-      )
-    },
-    {
-      title: 'STATUS',
-      key: 'status',
-      dataIndex: 'status',
-      render: (status: any, record: CategoryProps) => (
-        <>
-          {
-            <>
-              {/* <Switch
-              loading={record.statusLoading}
-              checked={record.isPublished}
-              onChange={() => {
-                setIsModalVisible(true);
-                setTmpData(record);
-              }}
-            /> */}
-              <Text>
-                {record.isPublished === true ?
-                  <Tag
-                    style={{
-                      border: "2px solid #31d63a",
-                      color: "#31d63a",
-                    }}>
-                    Active
-                  </Tag>
-                  :
-                  <Tag
-                    style={{
-                      border: "2px solid #D81F64",
-                      color: "#D81F64",
-                      marginBottom: "7%",
-                    }}
-                  >
-                    Inactive
-                  </Tag>}
-              </Text>
-            </>
-          }
-        </>
-      ),
-    },
-    {
-      title: 'CREATED AT',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (createdAt: any) => <div>{formatDate(createdAt)}</div>,
-    },
-    {
-      title: 'ACTION',
-      key: 'action',
-      render: (_: any, record: CategoryProps) => (
-        <Dropdown overlay={() => menu(record)} placement="bottomRight">
-          <MoreOutlined style={{ cursor: 'pointer' }} />
-        </Dropdown>
-      ),
-    },
-  ] as TableProps<CategoryProps>['columns'];
+  const handleReportDurationChange = (value: string) => {
+    setReportDuration(value);
+    setSelectedWeeks([]);
+    setSelectedMonths([]);
+  }
 
-  const menu = (record: CategoryProps) => (
-    <Menu onClick={(e) => handleClickAction(record, e.key)}>
-      <Menu.Item key="edit">Edit Category</Menu.Item>
-      <Menu.Item key="detail">Detail Category</Menu.Item>
-      <Menu.Item key="delete">Delete Category</Menu.Item>
-    </Menu>
-  );
+  const handleWeekChange = (value: string) => {
+    setSelectedWeeks((prevWeeks) => {
+      if (prevWeeks.includes(value)) {
+        return prevWeeks.filter((week) => week !== value);
+      } else {
+        return [...prevWeeks, value];
+      }
+    });
+  }
+
+  const handleMonthChange = (value: string) => {
+    setSelectedMonths((prevMonths) => {
+      if (prevMonths.includes(value)) {
+        return prevMonths.filter((month) => month !== value);
+      } else {
+        return [...prevMonths, value];
+      }
+    });
+  }
+
+
+
+
+
 
   return (
     <React.Fragment>
@@ -337,7 +243,7 @@ const Categories = () => {
                 </Col>
 
                 <Col span={6}>
-                  <Text style={{ fontSize: "16px" }}>Week</Text>
+                  <Text style={{ fontSize: "16px" }}>{reportDuration === 'daily' ? 'Day' : reportDuration === 'weekly' ? 'Week' : 'Month'}</Text>
                 </Col>
 
                 <Col span={4}>
@@ -347,26 +253,82 @@ const Categories = () => {
 
               <Row gutter={16} >
                 <Col span={7}>
-                  <Select defaultValue="line" style={{ width: "100%" }}>
-                    <Option value="line">Line</Option>
-                    <Option value="whatsapp">Whatsapp</Option>
+                  {/* <Select defaultValue="line" style={{ width: "100%" }}>
+                    <Select value="line">Line</Select>
+                    <Select value="whatsapp">Whatsapp</Select>
+                  </Select> */}
+                  <Select
+                    defaultValue={selectedMachine.machineId}
+                    style={{ width: "100%" }}
+                    onChange={(value) => {
+                      console.log(value)
+                      setSelectedMachine(machines.find((machine) => machine.machineId === value) || machines[0])
+                      handleFilterChange(undefined, value, undefined, undefined);
+                    }}
+                  >
+                    {machines.map((machine) => (
+                      <Select.Option key={machine.machineId} value={machine.machineId}>
+                        {machine.machine.name}
+                      </Select.Option>
+                    ))}
                   </Select>
+
                 </Col>
 
                 <Col span={7}>
-                  <Select defaultValue="daily" style={{ width: "100%" }}>
-                    <Option value="daily">Daily</Option>
-                    <Option value="weekly">Weekly</Option>
-                    <Option value="monthly">Monthly</Option>
+                  <Select
+                    defaultValue="daily"
+                    style={{ width: "100%" }}
+                    onChange={(value) => handleReportDurationChange(value)}
+                  >
+                    <Select.Option value="daily">Daily</Select.Option>
+                    <Select.Option value="weekly">Weekly</Select.Option>
+                    <Select.Option value="monthly">Monthly</Select.Option>
                   </Select>
                 </Col>
 
                 <Col span={6}>
-                  <Select defaultValue="week" style={{ width: "100%" }}>
-                    <Option value="week">Week</Option>
-                    <Option value="week">Week</Option>
-                    <Option value="week">Week</Option>
-                  </Select>
+                  {reportDuration === 'daily' && (
+                    <Select
+                      mode="multiple"
+                      style={{ width: "100%" }}
+                      placeholder="Select days"
+                      onChange={(values) => handleWeekChange(values)}
+                    >
+                      <Select.Option value="monday">Monday</Select.Option>
+                      <Select.Option value="tuesday">Tuesday</Select.Option>
+                      <Select.Option value="wednesday">Wednesday</Select.Option>
+                      <Select.Option value="thursday">Thursday</Select.Option>
+                      <Select.Option value="friday">Friday</Select.Option>
+                      <Select.Option value="saturday">Saturday</Select.Option>
+                      <Select.Option value="sunday">Sunday</Select.Option>
+                    </Select>  
+                  )}
+                  {reportDuration === 'weekly' && (
+                    <Select
+                      style={{ width: "100%" }}
+                      placeholder="Select weeks"
+                      onChange={(values) => setSelectedWeeks(values)}
+                    >
+                      <Select.Option value="week1">Week 1</Select.Option>
+                      <Select.Option value="week2">Week 2</Select.Option>
+                      <Select.Option value="week3">Week 3</Select.Option>
+                    </Select>
+                  )}
+                  {reportDuration === 'monthly' && (
+                    <Select
+                      style={{ width: "100%" }}
+                      placeholder="Select months"
+                      onChange={(values) => setSelectedMonths(values)}
+                    >
+                      {/* Logic to dynamically generate month options */}
+                      {/* For example, consider the current month is February 2024 */}
+                      <Select.Option value="2024-02">February 2024</Select.Option>
+                      <Select.Option value="2024-01">January 2024</Select.Option>
+                      <Select.Option value="2023-12">December 2023</Select.Option>
+                      {/* Add more months as needed */}
+                    </Select>
+                  )}
                 </Col>
 
                 <Col span={4}>
@@ -397,7 +359,7 @@ const Categories = () => {
             <Col span={24}>
               <Row gutter={16} style={{ border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "10px" }}>
                 <Col span={2}>
-                  <div style = {{display: "flex", justifyContent: "center", alignItems: "center", border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "13px", backgroundColor: "#F5F5F5" }} >
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", border: "1px solid rgba(5, 5, 5, 0.26)", borderRadius: 5, padding: "13px", backgroundColor: "#F5F5F5" }} >
                     <FileExcelOutlined style={{ fontSize: 25 }} />
                   </div>
                 </Col>

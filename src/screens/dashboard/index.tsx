@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
     // any props that come into the component
   }
 
-  const [active, setActive] = useState<string>("productionStatus")
+  const [active, setActive] = useState<string>("1")
 
   const Button = styled.button<ButtonProps>`
     color: ${({ active }) => (active ? 'white' : '#757575')};
@@ -74,23 +74,9 @@ const Dashboard: React.FC = () => {
 
   ];
 
-  // const Buttons = ({ children, active, id, onClick }: Props) => {
-  //   return (
-  //     <Button id={id} onClick={onClick} active={active === id ? true : false}>
-  //       {children}
-  //     </Button>
-  //   );
-  // }
-
   
   return (
     <React.Fragment>
-      {/* <div style={{ display: 'flex' }}>
-        <Buttons id="productionStatus" active={active} onClick={() => setActive("productionStatus")}>Production Status</Buttons>
-        <Buttons id="productionOutput" active={active} onClick={() => setActive("productionOutput")}>Production Output</Buttons>
-        <Buttons id="OEEVSTARGET" active={active} onClick={() => setActive("OEEVSTARGET")}>OEE VS Target</Buttons>
-        <Buttons id="OEE" active={active} onClick={() => setActive("OEE")}>OEE</Buttons>
-      </div> */}
       <Tabs activeKey={active} onChange={(key) => setActive(key)} style={{outline: "none"}} defaultActiveKey='1'>
         {tabItems.map((item) => (
           <Tabs.TabPane key={item.key}
