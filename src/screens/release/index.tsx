@@ -29,6 +29,7 @@ import moment from 'moment-timezone';
 import BASE_RELEASE_SHIFT from '../../const/shift';
 import ReleaseAddModal from './releaseModal/addRelease';
 import useFetchList from '../../hooks/useFetchList';
+import dayjs from 'dayjs';
 
 interface ResponseProps extends BaseResponseProps<ReleaseProps> {
   payload: Omit<ReleaseProps, 'createdAt' | 'updatedAt'>;
@@ -148,94 +149,76 @@ const Categories = () => {
   }
 
   const GroupingByHours: any = (data: ReleaseProps[]) => {
-
     const shifts = BASE_RELEASE_SHIFT;
-  
+
     const shift1: any = [];
     const shift2: any = [];
     const shift3: any = [];
-    let countShift1: any = [];
-    let countShift2: any = [];
-    let countShift3: any = [];
-    let accumulatedByHourShift1: any = [];
-    let accumulatedByHourShift2: any = [];
-    let accumulatedByHourShift3: any = [];
-  
+
     const hourAccumulatorShift1: { [hour: string]: number } = {};
     const hourAccumulatorShift2: { [hour: string]: number } = {};
     const hourAccumulatorShift3: { [hour: string]: number } = {};
-  
+
+    const allHoursShift1 = Array.from({ length: moment(shifts.shift1.end, 'HH:mm:ss').hour() - moment(shifts.shift1.start, 'HH:mm:ss').hour() + 1 }, (_, i) =>
+      moment(shifts.shift1.start, 'HH:mm:ss').add(i, 'hours').format('HH:00')
+    );
+
+    const allHoursShift2 = Array.from({ length: moment(shifts.shift2.end, 'HH:mm:ss').hour() - moment(shifts.shift2.start, 'HH:mm:ss').hour() + 1 }, (_, i) =>
+      moment(shifts.shift2.start, 'HH:mm:ss').add(i, 'hours').format('HH:00')
+    );
+
+    const allHoursShift3 = Array.from({ length: moment(shifts.shift3.end, 'HH:mm:ss').hour() - moment(shifts.shift3.start, 'HH:mm:ss').hour() + 1 }, (_, i) =>
+      moment(shifts.shift3.start, 'HH:mm:ss').add(i, 'hours').format('HH:00')
+    );
+
+    const allHours = {
+      shift1: allHoursShift1,
+      shift2: allHoursShift2,
+      shift3: allHoursShift3,
+    };
+
     data.forEach((time) => {
-      const format = 'hh:mm:ss';
-      const parsedData = moment(time.time).tz('Asia/Jakarta').format('HH:mm:ss');
-      console.log(parsedData);
-  
-      const hourGroup = moment(parsedData, format).format('HH:00');
-  
-      if (!hourAccumulatorShift1[hourGroup]) {
-        hourAccumulatorShift1[hourGroup] = 0;
-      }
-  
-      if (!hourAccumulatorShift2[hourGroup]) {
-        hourAccumulatorShift2[hourGroup] = 0;
-      }
-  
-      if (!hourAccumulatorShift3[hourGroup]) {
-        hourAccumulatorShift3[hourGroup] = 0;
-      }
-  
+      const parsedData = moment.tz(time.time, 'Asia/Jakarta').format('HH:00');
+
       if (parsedData >= shifts.shift1.start && parsedData <= shifts.shift1.end) {
-        shift1.push({ hourGroup, amount: time.amount });
-        countShift1 = hourAccumulatorShift1[hourGroup] += time.amount;
-        accumulatedByHourShift1 = Object.entries(hourAccumulatorShift1)
-          .filter(([time, amount]) => amount !== 0)
-          .map(([time, amount]) => ({ time, amount }));
-      } 
-      
-      
-      else if (parsedData >= shifts.shift2.start && parsedData <= shifts.shift2.end) {
-        shift2.push({ hourGroup, amount: time.amount });
-        countShift2 = hourAccumulatorShift2[hourGroup] += time.amount;
-        accumulatedByHourShift2 = Object.entries(hourAccumulatorShift2)
-          .filter(([time, amount]) => amount !== 0)
-          .map(([time, amount]) => ({ time, amount }));
-      } 
-      
-      
-      else if (parsedData >= shifts.shift3.start && parsedData <= shifts.shift3.end) {
-        shift3.push({ hourGroup, amount: time.amount });
-        countShift3 = hourAccumulatorShift3[hourGroup] += time.amount;
-        accumulatedByHourShift3 = Object.entries(hourAccumulatorShift3)
-          .filter(([time, amount]) => amount !== 0)
-          .map(([time, amount]) => ({ time, amount }));
+        shift1.push({ time: parsedData, amount: time.amount });
+        hourAccumulatorShift1[parsedData] = (hourAccumulatorShift1[parsedData] || 0) + time.amount;
+      } else if (parsedData >= shifts.shift2.start && parsedData <= shifts.shift2.end) {
+        shift2.push({ time: parsedData, amount: time.amount });
+        hourAccumulatorShift2[parsedData] = (hourAccumulatorShift2[parsedData] || 0) + time.amount;
+      } else if (parsedData >= shifts.shift3.start && parsedData <= shifts.shift3.end) {
+        shift3.push({ time: parsedData, amount: time.amount });
+        hourAccumulatorShift3[parsedData] = (hourAccumulatorShift3[parsedData] || 0) + time.amount;
       }
     });
-  
+
     const groupedByShift = {
       shift1,
       shift2,
       shift3,
     };
-  
+
     const countByShift = {
-      countShift1,
-      countShift2,
-      countShift3,
+      countShift1: shift1.reduce((acc: number, cur: any) => acc + cur.amount, 0),
+      countShift2: shift2.reduce((acc: number, cur: any) => acc + cur.amount, 0),
+      countShift3: shift3.reduce((acc: number, cur: any) => acc + cur.amount, 0),
     };
-  
+
     const accumulatedByHour = {
-      accumulatedByHourShift1,
-      accumulatedByHourShift2,
-      accumulatedByHourShift3,
+      accumulatedByHourShift1: allHours.shift1.map((hour) => ({ time: hour, amount: hourAccumulatorShift1[hour] || 0 })),
+      accumulatedByHourShift2: allHours.shift2.map((hour) => ({ time: hour, amount: hourAccumulatorShift2[hour] || 0 })),
+      accumulatedByHourShift3: allHours.shift3.map((hour) => ({ time: hour, amount: hourAccumulatorShift3[hour] || 0 })),
     };
-  
+
     return {
       groupedByShift,
       countByShift,
       accumulatedByHour,
     };
   };
-  
+
+
+
 
   console.log(data)
   console.log(GroupingByHours(data));
@@ -262,9 +245,10 @@ const Categories = () => {
       align: 'center',
       width: '50%',
       render: (text: string, record: ReleaseProps) => {
+        const currentAmount = record?.amount || 0;
         return (
           <div className="">
-            {record?.amount}
+            {currentAmount}
           </div>
         );
       }
@@ -295,7 +279,7 @@ const Categories = () => {
         title="Release"
         rightAction={
           <React.Fragment>
-            { isReleaseDebuggingEnabled && (
+            {isReleaseDebuggingEnabled && (
               <Button className="mr-2" type="primary" onClick={handleAddRelease}>
                 Add New Release
               </Button>
@@ -324,11 +308,13 @@ const Categories = () => {
             <DatePicker style={{ marginLeft: 10 }} onChange={(date, dateString) => {
               console.log(date, dateString);
               handleFilterChange(undefined, undefined, undefined, dateString);
-            }} />
+            }}
+              defaultValue={dayjs(date)}
+            />
           </React.Fragment>
         }
       />
-      <div style={{ height: '500px', width: '100%', backgroundColor: 'white', padding: "20px" }}>
+      <div style={{ height: 'auto', width: '100%', backgroundColor: 'white', padding: "20px" }}>
         <React.Fragment>
 
           <Row>
@@ -352,7 +338,7 @@ const Categories = () => {
                   <Table
                     loading={isLoading}
                     columns={columns}
-                    dataSource={GroupingByHours(data).accumulatedByHour[shift]}
+                    dataSource={GroupingByHours(data).accumulatedByHour[shift] || []}
                     pagination={{
                       pageSize: pagination.perPage,
                       current: pagination.page,
@@ -369,7 +355,7 @@ const Categories = () => {
                             {
                               shift === 'accumulatedByHourShift1' ? GroupingByHours(data).countByShift.countShift1 :
                                 shift === 'accumulatedByHourShift2' ? GroupingByHours(data).countByShift.countShift2 :
-                                  shift === 'accumulatedByHourShift3' ? GroupingByHours(data).countByShift.countShift3 : null
+                                  shift === 'accumulatedByHourShift3' ? GroupingByHours(data).countByShift.countShift3 : 0
                             }
                           </Text>
                         </Col>
