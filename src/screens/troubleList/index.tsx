@@ -27,27 +27,15 @@ import {
   BaseResponseProps, HttpParam,
 } from '../../types/config.type';
 import styled from 'styled-components';
-import useFetchList from '../../hooks/useFetchList';
-import { ProductProps } from '../../types/products.type';
 import { ITroubleListItem } from '../../data/model/trouble';
 import moment from 'moment';
 import useAuthUser from 'react-auth-kit/dist/hooks/useAuthUser';
 import { DetailUserWithMachine, ProductionStatus, Startup, StatusMachine } from '../../data/model/machines';
-import Timeline, {TimelineHeaders, DateHeader} from 'react-calendar-timeline'
-// make sure you include the timeline stylesheet or the timeline will not be styled
 import 'react-calendar-timeline/lib/Timeline.css'
 import { TroubleSimulator } from '../../components/TroubleSimulator';
 import dayjs, {Dayjs} from 'dayjs';
 import { Http } from '../../utility/http';
-import ListStatusProduction from '../../components/ListStatusProduction';
-
-type Item = {
-  id: string;
-  start_time: moment.Moment,
-  end_time: moment.Moment,
-  group: number;
-  itemProps?: any
-}
+import ProductionStatusCard, { Item } from '../../components/ProductionStatus';
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -149,9 +137,9 @@ const Categories = () => {
     console.log("hgyui",startup,trouble)
 
     setProductionBar([
-      ...trouble,
+      ...statusMachine,
       ...startup,
-      ...statusMachine
+      ...trouble,
     ])
   }
 
@@ -263,20 +251,10 @@ const Categories = () => {
           </React.Fragment>
         }
       />
-        <Card size="default" title={`Production Status - ${selectedMachine ? selectedMachine.machine.name : '-'}`} extra={<ListStatusProduction/>}>
-          <TabTimeline>
-          <Timeline
-            groups={groups}
-            items={productionBar}
-            defaultTimeStart={moment().startOf('day').hour(7)}
-            defaultTimeEnd={moment().add(1, 'day').startOf('day').hour(4)}
-            canMove={false}
-            canChangeGroup={false}
-            canResize={false}
-            clickTolerance={0}
-          />
-        </TabTimeline>
-        </Card>
+        <ProductionStatusCard
+          productionBar={productionBar}
+          seletedMachine={selectedMachine}
+        />
        <Table
           columns={columns}
           dataSource={production?.trouble}
@@ -306,38 +284,6 @@ export const ContainerFilter = styled.div`
   align-items: center;
   gap: 15px;
   margin-bottom: 15px;
-`;
-
-const TabTimeline = styled.div`
-  .rct-sidebar-row-even{
-    display: none;
-  }
-  .rct-scroll, .rct-calendar-header{
-    width: 100% !important;
-  }
-  .rct-sidebar, .rct-horizontal-lines{
-    display:none !important;
-  }
-  .rct-calendar-header div:first-child{
-    display:none;
-  }
-  .rct-header-root div:first-child{
-    display:none;
-  }
-  .rct-dateHeader{
-    border: none !important;
-    font-size: 10px !important;
-    baackground: #fff !important;
-  }
-  .rct-calendar-header, .rct-day-3, .rct-vl{
-    border:none !important;
-  }
-  .rct-header-root{
-    border-bottom: none !important;
-  }
-  .rct-calendar-header div:nth-child(2){
-    height:20px !important;
-  }
 `;
 
 export default Categories;
